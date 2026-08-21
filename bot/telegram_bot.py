@@ -248,10 +248,8 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
     url_personalizada = f"{url_base}?user_id={user_id}"
 
-    from telegram import WebAppInfo
     btn_dashboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📱 Abrir en Telegram", web_app=WebAppInfo(url=url_personalizada))],
-        [InlineKeyboardButton("🌐 Abrir en Navegador Móvil Completo", url=url_personalizada)]
+        [InlineKeyboardButton("📊 Abrir Mi Resumen de Bienestar", url=url_personalizada)]
     ])
 
     if result.get("success"):
@@ -346,20 +344,14 @@ async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """Comando /dashboard - Envia enlace nativo WebApp a Streamlit filtrado por el ID del usuario."""
     user_id = update.effective_user.id
     url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
-    url_personalizada = f"{url_base}?user_id={user_id}"
-
-    from telegram import WebAppInfo
     keyboard = [
-        [InlineKeyboardButton("📱 Abrir en Telegram (Ventana rápida)", web_app=WebAppInfo(url=url_personalizada))],
-        [InlineKeyboardButton("🌐 Abrir en Navegador Completo (Safari/Chrome)", url=url_personalizada)]
+        [InlineKeyboardButton("📊 Abrir Mi Resumen de Bienestar", url=url_personalizada)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
         "✨ **Tu Panel Privado de Bienestar**\n\n"
-        "Elige cómo prefieres abrir tus estadísticas:\n"
-        "• **Ventana rápida:** Se abre dentro de Telegram.\n"
-        "• **Navegador completo:** Se abre en Chrome/Safari con opción de descargas y vista amplia.",
+        "Presiona el botón de abajo para ver tus gráficos de estabilidad, consultar a tu asistente de bienestar y descargar tu informe PDF para la consulta médica:",
         parse_mode="Markdown",
         reply_markup=reply_markup
     )
