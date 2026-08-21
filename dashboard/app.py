@@ -134,7 +134,7 @@ else:
     # Si se accede directamente sin user_id desde Telegram, bloquemos la vista global por seguridad
     st.warning("🔒 **Acceso Privado Protegido**")
     st.info(
-        "Para ver tus estadísticas personales de forma segura, por favor abre el Dashboard directamente desde tu conversación en Telegram usando el comando `/dashboard` o la Web App del menú."
+        "Para ver tus estadísticas personales de forma segura, por favor abre tu panel presionado el botón **📊 Abrir Mi Resumen de Bienestar** directamente desde tu conversación en Telegram usando el comando `/dashboard` o al finalizar un registro."
     )
     st.stop()
 
