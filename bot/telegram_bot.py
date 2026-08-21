@@ -542,6 +542,14 @@ async def remove_recordatorio_command(update: Update, context: ContextTypes.DEFA
 
 async def test_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Envía un recordatorio de prueba programado en 5 segundos."""
+    if not context.job_queue:
+        await update.message.reply_text(
+            "⚠️ **JobQueue no está disponible.**\n"
+            "Por favor, instala `APScheduler`: `pip install python-telegram-bot[job-queue]` para activar recordatorios programados.",
+            parse_mode="Markdown"
+        )
+        return
+
     chat_id = update.effective_chat.id
     context.job_queue.run_once(
         enviar_recordatorio_job,
