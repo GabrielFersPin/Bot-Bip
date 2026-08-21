@@ -114,20 +114,28 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.sidebar.header("🔍 Filtros & Configuración")
-
-# Cargar lista de usuarios
-if db:
-    usuarios_disponibles = db.obtener_usuarios_unicos()
-else:
-    usuarios_disponibles = []
+# Detección de Telegram WebApp user_id vía parámetros de URL (st.query_params)
+query_params = st.query_params
+telegram_user_id = query_params.get("user_id", None)
 
 user_filter = None
-if usuarios_disponibles:
-    user_options = ["Todos los usuarios"] + [str(u) for u in usuarios_disponibles]
-    selected_user_str = st.sidebar.selectbox("Seleccionar Usuario (ID):", user_options)
-    if selected_user_str != "Todos los usuarios":
-        user_filter = int(selected_user_str)
+
+if telegram_user_id and str(telegram_user_id).isdigit():
+    user_filter = int(telegram_user_id)
+    st.sidebar.success(f"🔒 **Panel Privado** (ID Usuario: {user_filter})")
+else:
+    st.sidebar.header("🔍 Filtros & Configuración")
+    # Cargar lista de usuarios si no viene de una WebApp privada de Telegram
+    if db:
+        usuarios_disponibles = db.obtener_usuarios_unicos()
+    else:
+        usuarios_disponibles = []
+
+    if usuarios_disponibles:
+        user_options = ["Todos los usuarios"] + [str(u) for u in usuarios_disponibles]
+        selected_user_str = st.sidebar.selectbox("Seleccionar Usuario (ID):", user_options)
+        if selected_user_str != "Todos los usuarios":
+            user_filter = int(selected_user_str)
 
 # Filtro de rango de fechas
 today = datetime.now().date()

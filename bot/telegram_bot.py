@@ -91,11 +91,35 @@ async def registrar_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return ENERGIA
 
 
+async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Comando /dashboard - Envia enlace nativo WebApp a Streamlit filtrado por el ID del usuario."""
+    user_id = update.effective_user.id
+    url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
+    url_personalizada = f"{url_base}?user_id={user_id}"
+
+    from telegram import WebAppInfo
+    keyboard = [[
+        InlineKeyboardButton(
+            "📊 Abrir Mis Estadísticas Privadas", 
+            web_app=WebAppInfo(url=url_personalizada)
+        )
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        "✨ **Tu Panel Privado de Bienestar**\n\n"
+        "Haz clic en el botón de abajo para abrir tus gráficos de tendencias e informes de IA de forma 100% privada dentro de Telegram:",
+        parse_mode="Markdown",
+        reply_markup=reply_markup
+    )
+
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /ayuda - Muestra los comandos disponibles."""
     help_text = (
         "🤖 **Bot-Bip - Comandos Disponibles**\n\n"
         "• `/registrar` - Iniciar el registro diario de energía y humor.\n"
+        "• `/dashboard` - Abrir tu panel privado de estadísticas en Telegram.\n"
         "• `/recordatorio HH:MM` - Configurar recordatorio diario (ej: `/recordatorio 21:00`).\n"
         "• `/recordatorio_off` - Desactivar el recordatorio diario.\n"
         "• `/cancelar` - Cancelar el registro actual.\n"
@@ -354,6 +378,7 @@ def main():
     )
 
     app.add_handler(conv_handler)
+    app.add_handler(CommandHandler("dashboard", dashboard_command))
     app.add_handler(CommandHandler("ayuda", help_command))
     app.add_handler(CommandHandler("recordatorio", set_recordatorio_command))
     app.add_handler(CommandHandler("recordatorio_off", remove_recordatorio_command))
