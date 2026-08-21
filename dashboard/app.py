@@ -387,19 +387,22 @@ with col_csv:
     )
 
 with col_pdf:
-    try:
-        from ai_insights.pdf_generator import generar_pdf_clinico
-        pdf_bytes = generar_pdf_clinico(filtered_df)
-        st.download_button(
-            label="📄 Descargar Informe Clínico (PDF)",
-            data=pdf_bytes,
-            file_name=f"informe_medico_bienestar_{today.strftime('%Y_%m_%d')}.pdf",
-            mime="application/pdf",
-            use_container_width=True,
-            key=f"pdf_btn_{len(filtered_df)}"
-        )
-    except Exception as pdf_err:
-        st.warning(f"Error al generar PDF: {pdf_err}")
+    ver_informe = st.button("📄 Generar Vista de Informe Clínico", use_container_width=True)
+
+if "ver_informe" in locals() and ver_informe:
+    st.markdown("---")
+    st.markdown("### 🏥 Informe Clínico de Bienestar Psicoafectivo")
+    st.caption(f"Emitido el {today.strftime('%d/%m/%Y')} | Documento de apoyo para consulta profesional")
+    
+    col_m1, col_m2, col_m3 = st.columns(3)
+    col_m1.metric("⚡ Energía Promedio", f"{round(filtered_df['energia'].mean(), 1) if 'energia' in filtered_df.columns else 0}/10")
+    col_m2.metric("💖 Ánimo Promedio", f"{round(filtered_df['humor'].mean(), 1) if 'humor' in filtered_df.columns else 0}/10")
+    col_m3.metric("💤 Sueño Promedio", f"{round(filtered_df['sueno_horas'].mean(), 1) if 'sueno_horas' in filtered_df.columns else 0}h")
+
+    st.markdown("#### 📋 Detalle de Evaluaciones:")
+    display_df = filtered_df[["fecha", "energia", "humor", "comentarios"]].copy() if not filtered_df.empty else filtered_df
+    st.table(display_df.sort_values("fecha", ascending=False) if "fecha" in display_df.columns else display_df)
+    st.info("💡 **Consejo:** Puedes tomar una captura o imprimir esta vista directamente desde tu navegador móvil para tu psiquiatra/psicólogo.")
 
 # ==============================================================================
 # INTEGRACIÓN DEL AI INSIGHTS AGENT (LLM REASONING)
