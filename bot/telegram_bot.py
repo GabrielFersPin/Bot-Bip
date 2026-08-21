@@ -326,17 +326,25 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 
 async def registrar_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Comando /registrar - Inicia el flujo de preguntas."""
+    """Comando /registrar o botón de recordatorio - Inicia el flujo de preguntas."""
     text = (
         "⚡ **Registro Diario de Bienestar**\n\n"
         "**¿Cómo está tu nivel de ENERGÍA hoy?** (1 al 10):\n"
         "*(1 = Exhausto/a | 10 = Plena energía)*"
     )
-    await update.message.reply_text(
-        text,
-        parse_mode="Markdown",
-        reply_markup=get_rating_keyboard("energia")
-    )
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.message.reply_text(
+            text,
+            parse_mode="Markdown",
+            reply_markup=get_rating_keyboard("energia")
+        )
+    else:
+        await update.message.reply_text(
+            text,
+            parse_mode="Markdown",
+            reply_markup=get_rating_keyboard("energia")
+        )
     return ENERGIA
 
 
@@ -605,7 +613,7 @@ def main():
     )
 
     app.add_handler(conv_handler)
-    app.add_handler(CallbackQueryHandler(horario_callback_handler, pattern="^(set_hora_|iniciar_registro_ahora)"))
+    app.add_handler(CallbackQueryHandler(horario_callback_handler, pattern="^set_hora_"))
     app.add_handler(CommandHandler("dashboard", dashboard_command))
     app.add_handler(CommandHandler("calma", calma_command))
     app.add_handler(CommandHandler("contacto", agregar_contacto_command))
