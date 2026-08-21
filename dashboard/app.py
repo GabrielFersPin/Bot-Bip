@@ -203,140 +203,90 @@ else:
     correlacion = 0.0
 
 # ==============================================================================
-# DASHBOARD: KPIs Y MÉTRICAS CLAVE
+# DASHBOARD: TARJETAS DE RESUMEN DE BIENESTAR (USER-FRIENDLY)
 # ==============================================================================
 
 col1, col2, col3, col4 = st.columns(4)
 
+avg_energia = df['energia'].mean()
+avg_humor = df['humor'].mean()
+
 with col1:
     st.metric(
-        label="⚡ Promedio Energía",
-        value=f"{df['energia'].mean():.1f} / 10",
-        delta=f"Última: {df['energia'].iloc[-1]}" if not df.empty else None
+        label="⚡ Nivel de Energía",
+        value=f"{avg_energia:.1f} / 10",
+        delta="¡Muy buena energía!" if avg_energia >= 7 else "Energía moderada"
     )
 
 with col2:
     st.metric(
-        label="🎭 Promedio Humor",
-        value=f"{df['humor'].mean():.1f} / 10",
-        delta=f"Última: {df['humor'].iloc[-1]}" if not df.empty else None
+        label="💖 Estado de Ánimo",
+        value=f"{avg_humor:.1f} / 10",
+        delta="¡Ánimo fantástico!" if avg_humor >= 7 else "Ánimo estable"
     )
 
 with col3:
-    if pd.isna(correlacion):
-        corr_label = "N/A"
+    # Explicación sencilla en lugar de "Coeficiente de Correlación de Pearson"
+    if not pd.isna(correlacion) and correlacion > 0.4:
+        relacion_text = "Tener más energía te sube mucho el ánimo 🚀"
+    elif not pd.isna(correlacion) and correlacion > 0.1:
+        relacion_text = "Tu energía y ánimo van bastante de la mano 🤝"
     else:
-        corr_label = f"{correlacion:+.2f}"
-    
-    # Interpretación cualitativa de correlación
-    if not pd.isna(correlacion) and correlacion > 0.5:
-        corr_desc = "Fuerte Positiva"
-    elif not pd.isna(correlacion) and correlacion > 0.2:
-        corr_desc = "Moderada Positiva"
-    elif not pd.isna(correlacion) and correlacion < -0.2:
-        corr_desc = "Inversa / Negativa"
-    else:
-        corr_desc = "Sin Correlación Clara"
+        relacion_text = "Tu ánimo es independiente de tu cansancio 🌈"
 
     st.metric(
-        label="🔗 Correlación Energía-Humor",
-        value=corr_label,
-        delta=corr_desc
+        label="✨ Tu Patrón Principal",
+        value=relacion_text
     )
 
 with col4:
     st.metric(
-        label="📅 Total Registros",
-        value=str(len(df)),
-        delta=f"Días evaluados"
+        label="🗓️ Días Registrados",
+        value=f"{len(df)} días",
+        delta="¡Gran constancia!"
     )
 
 st.markdown("---")
 
 # ==============================================================================
-# GRÁFICOS INTERACTIVOS (ST.LINE_CHART Y PLOTLY)
+# GRÁFICOS VISUALES Y CÁLIDOS (SIN TÉRMINOS TÉCNICOS)
 # ==============================================================================
 
-st.subheader("📈 Evolución Temporal: Energía vs. Humor")
+st.subheader("📊 Tu Evolución de Bienestar")
 
-# Pestañas para elegir vista gráfica
-tab1, tab2, tab3 = st.tabs(["📉 Tendencias en Línea (Media Móvil)", "📊 Comparativa st.line_chart", "🎯 Matriz de Correlación (Scatter)"])
+# Gráfico principal estilizado en Plotly
+fig = go.Figure()
 
-with tab1:
-    fig = go.Figure()
-    
-    # Serie original Energía
-    fig.add_trace(go.Scatter(
-        x=df["fecha"], y=df["energia"],
-        mode="markers+lines",
-        name="Energía Diaria",
-        line=dict(color="#38bdf8", width=1.5, dash="dot"),
-        marker=dict(size=6)
-    ))
-    
-    # Media móvil Energía
-    fig.add_trace(go.Scatter(
-        x=df["fecha"], y=df["energia_rolling"],
-        mode="lines",
-        name=f"Energía (Media {ventana_media_movil}d)",
-        line=dict(color="#0284c7", width=3)
-    ))
+# Línea de Energía
+fig.add_trace(go.Scatter(
+    x=df["fecha"], y=df["energia_rolling"],
+    mode="lines+markers",
+    name="⚡ Energía",
+    line=dict(color="#38bdf8", width=4, shape="spline"),
+    marker=dict(size=8, color="#0284c7")
+))
 
-    # Serie original Humor
-    fig.add_trace(go.Scatter(
-        x=df["fecha"], y=df["humor"],
-        mode="markers+lines",
-        name="Humor Diario",
-        line=dict(color="#f43f5e", width=1.5, dash="dot"),
-        marker=dict(size=6)
-    ))
+# Línea de Humor
+fig.add_trace(go.Scatter(
+    x=df["fecha"], y=df["humor_rolling"],
+    mode="lines+markers",
+    name="💖 Estado de Ánimo",
+    line=dict(color="#f43f5e", width=4, shape="spline"),
+    marker=dict(size=8, color="#be123c")
+))
 
-    # Media móvil Humor
-    fig.add_trace(go.Scatter(
-        x=df["fecha"], y=df["humor_rolling"],
-        mode="lines",
-        name=f"Humor (Media {ventana_media_movil}d)",
-        line=dict(color="#be123c", width=3)
-    ))
+fig.update_layout(
+    template="plotly_dark",
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(15,23,42,0.6)",
+    height=400,
+    margin=dict(l=20, r=20, t=30, b=20),
+    yaxis=dict(range=[0, 10.5], title="Escala de Bienestar (1-10)"),
+    xaxis=dict(title="Fecha"),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+)
 
-    fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        height=450,
-        margin=dict(l=20, r=20, t=30, b=20),
-        yaxis=dict(range=[0, 10.5], title="Escala (1-10)"),
-        xaxis=dict(title="Fecha"),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-with tab2:
-    st.caption("Gráfico ligero nativo con `st.line_chart`:")
-    chart_data = df.set_index("fecha")[["energia", "humor", "energia_rolling", "humor_rolling"]]
-    chart_data.columns = ["Energía", "Humor", "Media Energía", "Media Humor"]
-    st.line_chart(chart_data)
-
-with tab3:
-    st.caption("Dispersión y regresión lineal entre nivel de energía y estado de ánimo:")
-    fig_scatter = px.scatter(
-        df,
-        x="energia",
-        y="humor",
-        trendline="ols" if len(df) > 2 else None,
-        hover_data=["fecha", "comentarios"],
-        labels={"energia": "Nivel de Energía (1-10)", "humor": "Nivel de Humor (1-10)"},
-        title="Relación entre Energía y Humor",
-        color="energia",
-        color_continuous_scale="Blues"
-    )
-    fig_scatter.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        height=420
-    )
-    st.plotly_chart(fig_scatter, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True)
 
 # ==============================================================================
 # TABLA DE DATOS HISTÓRICOS Y EXPORTACIÓN
