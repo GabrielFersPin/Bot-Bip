@@ -414,11 +414,13 @@ with st.container():
 if generar_reporte:
     with st.spinner("🌸 Observando tus patrones de energía y descanso... Un momento por favor..."):
         try:
-            from ai_insights.ai_agent import AIInsightsAgent
-            agent = AIInsightsAgent()
+            import importlib
+            import ai_insights.ai_agent as ai_module
+            importlib.reload(ai_module)
+            agent = ai_module.AIInsightsAgent()
             reporte_markdown = agent.analizar_tendencias(filtered_df.to_dict(orient="records"))
             
-            st.success("✅ **¡Análisis de IA completado!**")
+            st.success("✅ **¡Análisis de Bienestar completado!**")
             
             # Tarjeta de lectura limpia
             st.markdown(
