@@ -39,11 +39,12 @@ class SupabaseManager:
         user_id: int,
         energia: int,
         humor: int,
+        sueno_horas: float = 8.0,
         comentarios: str = "",
         fecha_registro: Optional[date] = None
     ) -> Dict[str, Any]:
         """
-        Inserta o actualiza (upsert) un registro diario de energía, humor y comentarios.
+        Inserta o actualiza (upsert) un registro diario de energía, humor, horas de descanso y comentarios.
         """
         fecha_str = (fecha_registro or date.today()).isoformat()
 
@@ -52,6 +53,7 @@ class SupabaseManager:
             "fecha": fecha_str,
             "energia": energia,
             "humor": humor,
+            "sueno_horas": sueno_horas,
             "comentarios": comentarios
         }
 

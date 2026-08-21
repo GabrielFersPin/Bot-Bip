@@ -217,6 +217,7 @@ col1, col2, col3, col4 = st.columns(4)
 
 avg_energia = df['energia'].mean()
 avg_humor = df['humor'].mean()
+avg_sueno = df['sueno_horas'].mean() if "sueno_horas" in df.columns else 8.0
 
 with col1:
     st.metric(
@@ -233,17 +234,10 @@ with col2:
     )
 
 with col3:
-    # Explicación sencilla en lugar de "Coeficiente de Correlación de Pearson"
-    if not pd.isna(correlacion) and correlacion > 0.4:
-        relacion_text = "Tener más energía te sube mucho el ánimo 🚀"
-    elif not pd.isna(correlacion) and correlacion > 0.1:
-        relacion_text = "Tu energía y ánimo van bastante de la mano 🤝"
-    else:
-        relacion_text = "Tu ánimo es independiente de tu cansancio 🌈"
-
     st.metric(
-        label="✨ Tu Patrón Principal",
-        value=relacion_text
+        label="💤 Promedio Descanso",
+        value=f"{avg_sueno:.1f}h",
+        delta="Descanso óptimo" if 7 <= avg_sueno <= 9 else ("Descanso corto ⚠️" if avg_sueno < 6 else "Sueño prolongado")
     )
 
 with col4:
@@ -259,11 +253,18 @@ st.markdown("---")
 # GRÁFICOS VISUALES Y CÁLIDOS (SIN TÉRMINOS TÉCNICOS)
 # ==============================================================================
 
-st.subheader("📊 Tu Evolución de Bienestar")
+st.subheader("📊 Tu Evolución de Bienestar & Descanso")
 
-# Gráfico limpio de fluctuaciones usando st.line_chart nativo de Streamlit (sin zoom táctil ni desbordamientos)
-chart_df = df.set_index("fecha")[["energia", "humor"]].copy()
-chart_df.columns = ["⚡ Energía", "💖 Ánimo"]
+# Gráfico limpio de fluctuaciones usando st.line_chart nativo de Streamlit
+chart_cols = ["energia", "humor"]
+if "sueno_horas" in df.columns:
+    chart_cols.append("sueno_horas")
+
+chart_df = df.set_index("fecha")[chart_cols].copy()
+if "sueno_horas" in df.columns:
+    chart_df.columns = ["⚡ Energía", "💖 Ánimo", "💤 Horas de Descanso"]
+else:
+    chart_df.columns = ["⚡ Energía", "💖 Ánimo"]
 
 st.line_chart(
     chart_df,

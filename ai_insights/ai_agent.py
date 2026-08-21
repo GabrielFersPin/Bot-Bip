@@ -60,21 +60,21 @@ class AIInsightsAgent:
         # Formatear el histórico para la prompt de la LLM
         resumen_datos = ""
         for r in registros[:14]:  # Últimos 14 registros
-            resumen_datos += f"- Fecha: {r.get('fecha')}, Energía: {r.get('energia')}/10, Humor: {r.get('humor')}/10. Nota: {r.get('comentarios', 'Sin nota')}\n"
+            resumen_datos += f"- Fecha: {r.get('fecha')}, Energía: {r.get('energia')}/10, Humor: {r.get('humor')}/10, Descanso: {r.get('sueno_horas', '8.0')}h. Nota: {r.get('comentarios', 'Sin nota')}\n"
 
         prompt = f"""
-Eres un asistente experto en bienestar personal, analítica de datos y psicología positiva.
-Analiza la siguiente serie temporal de registros diarios de energía y humor de un usuario:
+Eres un asistente especializado en seguimiento psicoafectivo y apoyo en estabilidad del estado de ánimo (enfoque en trastorno bipolar y bienestar mental).
+Analiza la siguiente serie temporal de registros diarios de energía, humor y horas de descanso de un usuario:
 
 HISTÓRICO DE REGISTROS (Últimos días):
 {resumen_datos}
 
-Por favor, proporciona un análisis estructurado en formato Markdown con las siguientes secciones:
-1. 📈 **Patrones y Tendencias**: (Identifica cómo se relacionan la energía, el humor y los comentarios).
-2. 💡 **Observaciones Clave**: (Factores que parecen aumentar o disminuir el bienestar).
-3. 🎯 **Recomendación Personalizada**: (1 o 2 consejos prácticos y empáticos para mejorar la rutina).
+Por favor, proporciona un informe estructurado en formato Markdown enfocado en la estabilidad y autocuidado:
+1. 📈 **Evaluación de Estabilidad de Ánimo y Descanso**: (Evalúa si el descanso ha sido adecuado y si la fluctuación entre energía y humor se mantiene estable).
+2. ⚠️ **Detección Precoz de Alertas / Virajes**: (Identifica señales tempranas de sobreestimulación/hipomanía como alta energía con poco sueño, o de fase depresiva por caídas continuas).
+3. 🌿 **Recomendaciones de Higiene del Sueño y Calma**: (Consejos prácticos, compasivos y empáticos para proteger las rutinas de descanso y la estabilidad).
 
-Mantén un tono motivador, cercano y profesional.
+Mantén un tono súper cálido, libre de juicios, motivador y preventivo.
 """
 
         try:

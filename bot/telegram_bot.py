@@ -29,7 +29,182 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Estados de la conversación
-ENERGIA, HUMOR, COMENTARIOS = range(3)
+ENERGIA, HUMOR, SUENO, COMENTARIOS = range(4)
+
+def get_sueno_keyboard() -> InlineKeyboardMarkup:
+    """Genera un teclado en línea para seleccionar horas de sueño/descanso."""
+    keyboard = [
+        [InlineKeyboardButton("< 4h ⚠️", callback_data="sueno_3.0"), InlineKeyboardButton("5h - 6h 🌙", callback_data="sueno_5.5")],
+        [InlineKeyboardButton("7h - 8h 💤", callback_data="sueno_7.5"), InlineKeyboardButton("9h - 10h 🛌", callback_data="sueno_9.5")],
+        [InlineKeyboardButton("> 11h 💤", callback_data="sueno_11.0")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+async def calma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Comando /calma - Espacio de apoyo rápido para momentos de sobreestimulación o ansiedad."""
+    calma_text = (
+        "💙 **Espacio de Calma & Grounding** 🌿\n\n"
+        "Tómate un momento. Estás a salvo. Vamos a conectar con el presente:\n\n"
+        "🌬️ **Técnica 4-7-8 de Respiración:**\n"
+        "1. Inhala suavemente por la nariz contando hasta **4**.\n"
+        "2. Mantén el aire contando hasta **7**.\n"
+        "3. Exhala despacio por la boca contando hasta **8**.\n\n"
+        "👁️ **Técnica 5-4-3-2-1 de Anclaje:**\n"
+        "• Nombra **5 cosas** que veas a tu alrededor.\n"
+        "• Nombra **4 cosas** que puedas tocar.\n"
+        "• Nombra **3 sonidos** que escuches.\n"
+        "• Nombra **2 olores** que percibas.\n"
+        "• Nombra **1 emoción** que sientas sin juzgarla.\n\n"
+        "💊 *Recordatorio amable: ¿Has tomado tu medicación habitual de hoy?*"
+    )
+    await update.message.reply_text(calma_text, parse_mode="Markdown")
+
+
+async def humor_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Procesa la respuesta de HUMOR e inicia la pregunta de SUEÑO."""
+    val = None
+    if update.callback_query:
+        await update.callback_query.answer()
+        data = update.callback_query.data
+        if data.startswith("humor_"):
+            val = int(data.split("_")[1])
+    elif update.message and update.message.text:
+        text = update.message.text.strip()
+        if text.isdigit():
+            val = int(text)
+
+    if val is None or not (1 <= val <= 10):
+        msg = "⚠️ Por favor, ingresa un número válido entre **1 y 10** para el humor."
+        if update.callback_query:
+            await update.callback_query.edit_message_text(msg, parse_mode="Markdown", reply_markup=get_rating_keyboard("humor"))
+        else:
+            await update.message.reply_text(msg, parse_mode="Markdown", reply_markup=get_rating_keyboard("humor"))
+        return HUMOR
+
+    context.user_data["humor"] = val
+
+    sueno_text = (
+        f"✅ Humor guardado: **{val}/10**\n\n"
+        "💤 **¿Cuántas horas aproximadas has dormido/descansado anoche?**\n"
+        "*(El descanso es el marcador biológico principal para tu estabilidad)*:"
+    )
+
+    if update.callback_query:
+        await update.callback_query.edit_message_text(
+            sueno_text,
+            parse_mode="Markdown",
+            reply_markup=get_sueno_keyboard()
+        )
+    else:
+        await update.message.reply_text(
+            sueno_text,
+            parse_mode="Markdown",
+            reply_markup=get_sueno_keyboard()
+        )
+
+    return SUENO
+
+
+async def sueno_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Procesa las horas de SUEÑO e inicia la pregunta de COMENTARIOS."""
+    val = 8.0
+    if update.callback_query:
+        await update.callback_query.answer()
+        data = update.callback_query.data
+        if data.startswith("sueno_"):
+            val = float(data.split("_")[1])
+    elif update.message and update.message.text:
+        text = update.message.text.strip().replace(",", ".")
+        try:
+            val = float(text)
+        except ValueError:
+            val = 8.0
+
+    context.user_data["sueno_horas"] = val
+
+    comment_text = (
+        f"✅ Descanso guardado: **{val}h**\n\n"
+        "📝 **¿Quieres agregar algún comentario u observación sobre tu día?**\n"
+        "(Escribe tus notas en un mensaje o presiona el botón para omitir):"
+    )
+
+    if update.callback_query:
+        await update.callback_query.edit_message_text(
+            comment_text,
+            parse_mode="Markdown",
+            reply_markup=get_skip_keyboard()
+        )
+    else:
+        await update.message.reply_text(
+            comment_text,
+            parse_mode="Markdown",
+            reply_markup=get_skip_keyboard()
+        )
+
+    return COMENTARIOS
+
+
+async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Procesa el comentario final y guarda todo en Supabase con alertas precoces."""
+    user_id = update.effective_user.id
+    comentario = ""
+
+    if update.callback_query:
+        await update.callback_query.answer()
+        if update.callback_query.data == "skip_comments":
+            comentario = ""
+    elif update.message and update.message.text:
+        comentario = update.message.text.strip()
+
+    energia = context.user_data.get("energia", 5)
+    humor = context.user_data.get("humor", 5)
+    sueno_horas = context.user_data.get("sueno_horas", 8.0)
+
+    # Guardar en Supabase
+    result = db.guardar_registro_diario(
+        user_id=user_id,
+        energia=energia,
+        humor=humor,
+        sueno_horas=sueno_horas,
+        comentarios=comentario
+    )
+
+    context.user_data.clear()
+
+    # Detección precoz de alertas clínicas (Virajes de fase)
+    alerta_text = ""
+    if energia >= 9 and sueno_horas <= 4:
+        alerta_text = (
+            "\n\n⚠️ **Aviso de Bienestar:** Notamos alta energía (9-10) con muy pocas horas de descanso (<4h). "
+            "Intenta tomar un espacio de relajación hoy con `/calma`."
+        )
+    elif energia <= 3 and humor <= 3:
+        alerta_text = (
+            "\n\n💙 **Aviso de Apoyo:** Tu nivel de energía y ánimo están bajos hoy. "
+            "Sé amable contigo mismo/a. Si lo necesitas, busca a personas de confianza o usa el comando `/calma`."
+        )
+
+    if result.get("success"):
+        summary_text = (
+            "🎉 **¡Registro Guardado con Éxito!**\n\n"
+            f"⚡ **Energía:** {energia}/10\n"
+            f"🎭 **Humor:** {humor}/10\n"
+            f"💤 **Descanso:** {sueno_horas}h\n"
+            f"📝 **Notas:** {comentario if comentario else 'Sin comentarios'}"
+            f"{alerta_text}"
+        )
+    else:
+        summary_text = (
+            "❌ Hubo un inconveniente al guardar tu registro en la base de datos.\n"
+            f"Detalle: `{result.get('error')}`"
+        )
+
+    if update.callback_query:
+        await update.callback_query.edit_message_text(summary_text, parse_mode="Markdown")
+    else:
+        await update.message.reply_text(summary_text, parse_mode="Markdown")
+
+    return ConversationHandler.END
 
 # Instancia del cliente de Supabase (usando Service Role para backend seguro)
 try:
@@ -369,6 +544,10 @@ def main():
                 CallbackQueryHandler(humor_step, pattern="^humor_"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, humor_step)
             ],
+            SUENO: [
+                CallbackQueryHandler(sueno_step, pattern="^sueno_"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, sueno_step)
+            ],
             COMENTARIOS: [
                 CallbackQueryHandler(comentarios_step, pattern="^skip_comments$"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, comentarios_step)
@@ -379,6 +558,7 @@ def main():
 
     app.add_handler(conv_handler)
     app.add_handler(CommandHandler("dashboard", dashboard_command))
+    app.add_handler(CommandHandler("calma", calma_command))
     app.add_handler(CommandHandler("ayuda", help_command))
     app.add_handler(CommandHandler("recordatorio", set_recordatorio_command))
     app.add_handler(CommandHandler("recordatorio_off", remove_recordatorio_command))

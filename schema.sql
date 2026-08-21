@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS public.registros_diarios (
     fecha DATE NOT NULL DEFAULT CURRENT_DATE,           -- Fecha del registro (sin hora)
     energia INT NOT NULL CHECK (energia >= 1 AND energia <= 10), -- Nivel de energía (1-10)
     humor INT NOT NULL CHECK (humor >= 1 AND humor <= 10),       -- Nivel de humor/ánimo (1-10)
+    sueno_horas NUMERIC(3,1) DEFAULT 8.0 CHECK (sueno_horas >= 0 AND sueno_horas <= 24), -- Horas de descanso/sueño
     comentarios TEXT DEFAULT '',                        -- Comentarios u observaciones
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),  -- Marca de tiempo exacta
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),  -- Fecha de última actualización
