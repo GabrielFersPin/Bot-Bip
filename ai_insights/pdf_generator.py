@@ -14,7 +14,7 @@ class InformeClinicoPDF(FPDF):
         self.ln(5)
         # Línea divisoria
         self.set_draw_color(226, 232, 240)
-        self.set_linewidth(0.5)
+        self.set_line_width(0.5)
         self.line(10, self.get_y(), 200, self.get_y())
         self.ln(5)
 
@@ -58,9 +58,9 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
         pdf.ln(2)
 
         pdf.set_font("Helvetica", "", 10)
-        pdf.cell(63, 7, f"⚡ Energía Promedio: {prom_energia}/10", border=1, align="C")
-        pdf.cell(63, 7, f"💖 Ánimo Promedio: {prom_humor}/10", border=1, align="C")
-        pdf.cell(64, 7, f"💤 Sueño Promedio: {prom_sueno}h", border=1, align="C")
+        pdf.cell(63, 7, f"Energia Promedio: {prom_energia}/10", border=1, align="C")
+        pdf.cell(63, 7, f"Animo Promedio: {prom_humor}/10", border=1, align="C")
+        pdf.cell(64, 7, f"Sueno Promedio: {prom_sueno}h", border=1, align="C")
         pdf.ln(10)
 
     # 3. Resumen Interpretativo / Diagnóstico con IA (Si está presente)
