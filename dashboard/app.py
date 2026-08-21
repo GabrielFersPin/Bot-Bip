@@ -250,27 +250,62 @@ with col4:
 st.markdown("---")
 
 # ==============================================================================
-# GRÁFICOS VISUALES Y CÁLIDOS (SIN TÉRMINOS TÉCNICOS)
+# GRÁFICOS VISUALES Y CÁLIDOS (PUNTOS Y LÍNEAS CLARAS)
 # ==============================================================================
 
 st.subheader("📊 Tu Evolución de Bienestar & Descanso")
 
-# Gráfico limpio de fluctuaciones usando st.line_chart nativo de Streamlit
-chart_cols = ["energia", "humor"]
-if "sueno_horas" in df.columns:
-    chart_cols.append("sueno_horas")
+# Si hay múltiples registros en el mismo día o varios puntos, preparar el DataFrame
+chart_df = df.copy()
 
-chart_df = df.set_index("fecha")[chart_cols].copy()
-if "sueno_horas" in df.columns:
-    chart_df.columns = ["⚡ Energía", "💖 Ánimo", "💤 Horas de Descanso"]
+# Crear etiquetas legibles para el eje X
+if "created_at" in chart_df.columns:
+    chart_df["momento"] = pd.to_datetime(chart_df["created_at"]).dt.strftime("%d/%m %H:%M")
 else:
-    chart_df.columns = ["⚡ Energía", "💖 Ánimo"]
+    chart_df["momento"] = pd.to_datetime(chart_df["fecha"]).dt.strftime("%d/%m")
 
-st.line_chart(
-    chart_df,
-    height=320,
-    use_container_width=True
+chart_cols_map = {"energia": "⚡ Energía", "humor": "💖 Ánimo"}
+if "sueno_horas" in chart_df.columns:
+    chart_cols_map["sueno_horas"] = "💤 Descanso (h)"
+
+chart_df_melted = chart_df.melt(
+    id_vars=["momento"], 
+    value_vars=list(chart_cols_map.keys()),
+    var_name="Métrica", 
+    value_name="Valor"
 )
+chart_df_melted["Métrica"] = chart_df_melted["Métrica"].map(chart_cols_map)
+
+import plotly.express as px
+
+fig = px.line(
+    chart_df_melted,
+    x="momento",
+    y="Valor",
+    color="Métrica",
+    markers=True,  # Hace que los puntos de cada registro sean VISIBLES sin importar cuántos haya
+    color_discrete_map={
+        "⚡ Energía": "#38bdf8",
+        "💖 Ánimo": "#f43f5e",
+        "💤 Descanso (h)": "#a855f7"
+    }
+)
+
+fig.update_layout(
+    template="plotly_dark",
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
+    margin=dict(l=10, r=10, t=10, b=10),
+    height=330,
+    hovermode="x unified",
+    xaxis=dict(title=None, showgrid=True, gridcolor="#334155"),
+    yaxis=dict(title=None, range=[0, 11], showgrid=True, gridcolor="#334155"),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title=None)
+)
+
+fig.update_traces(line=dict(width=3), marker=dict(size=9))
+
+st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 # ==============================================================================
 # TABLA DE DATOS HISTÓRICOS Y EXPORTACIÓN
