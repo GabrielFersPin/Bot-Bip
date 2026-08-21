@@ -262,11 +262,16 @@ st.subheader("📊 Tu Evolución de Bienestar & Descanso")
 # Si hay múltiples registros en el mismo día o varios puntos, preparar el DataFrame
 chart_df = df.copy()
 
-# Crear etiquetas legibles para el eje X
+# Crear etiquetas legibles para el eje X en hora local (España / UTC+2)
 if "created_at" in chart_df.columns:
-    # Convertir a marca temporal y ajustar a hora local si viene con UTC
     chart_df["momento_dt"] = pd.to_datetime(chart_df["created_at"])
-    chart_df["momento"] = chart_df["momento_dt"].dt.tz_localize(None).dt.strftime("%d/%m %H:%M")
+    # Si viene con timezone, convertir a hora de Madrid (Europe/Madrid), si es naive, asumirla UTC y convertir
+    if chart_df["momento_dt"].dt.tz is None:
+        chart_df["momento_dt"] = chart_df["momento_dt"].dt.tz_localize("UTC").dt.tz_convert("Europe/Madrid")
+    else:
+        chart_df["momento_dt"] = chart_df["momento_dt"].dt.tz_convert("Europe/Madrid")
+    
+    chart_df["momento"] = chart_df["momento_dt"].dt.strftime("%d/%m %H:%M")
 else:
     chart_df["momento"] = pd.to_datetime(chart_df["fecha"]).dt.strftime("%d/%m")
 
