@@ -395,10 +395,11 @@ with col_pdf:
             data=pdf_bytes,
             file_name=f"informe_medico_bienestar_{today.strftime('%Y_%m_%d')}.pdf",
             mime="application/pdf",
-            use_container_width=True
+            use_container_width=True,
+            key=f"pdf_btn_{len(filtered_df)}"
         )
     except Exception as pdf_err:
-        st.warning(f"Opción de PDF disponible tras instalar dependencias ({pdf_err})")
+        st.warning(f"Error al generar PDF: {pdf_err}")
 
 # ==============================================================================
 # INTEGRACIÓN DEL AI INSIGHTS AGENT (LLM REASONING)
