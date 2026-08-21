@@ -349,9 +349,10 @@ async def registrar_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 
 async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Comando /dashboard - Envia enlace nativo WebApp a Streamlit filtrado por el ID del usuario."""
+    """Comando /dashboard - Envia enlace nativo a Streamlit filtrado por el ID del usuario."""
     user_id = update.effective_user.id
     url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
+    url_personalizada = f"{url_base}?user_id={user_id}"
     keyboard = [
         [InlineKeyboardButton("📊 Abrir Mi Resumen de Bienestar", url=url_personalizada)]
     ]
