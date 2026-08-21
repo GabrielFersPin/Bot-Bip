@@ -48,13 +48,15 @@ class SupabaseManager:
         """
         fecha_str = (fecha_registro or date.today()).isoformat()
 
+        from datetime import datetime
         data = {
             "user_id": user_id,
             "fecha": fecha_str,
             "energia": energia,
             "humor": humor,
             "sueno_horas": sueno_horas,
-            "comentarios": comentarios
+            "comentarios": comentarios,
+            "created_at": datetime.now().isoformat()
         }
 
         try:
