@@ -53,12 +53,13 @@ async def calma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         for c in contactos:
             nombre = c.get("nombre")
             telefono = c.get("telefono", "").replace(" ", "").replace("-", "")
-            text_contactos += f"• **{nombre}** ({c.get('relacion')}): `{telefono}`\n"
+            relacion = c.get("relacion", "Apoyo")
+            text_contactos += f"• **{nombre}** ({relacion}): `{telefono}`\n"
             
-            # Crear botones interactivos con enlace directo tel: y WhatsApp
+            # Telegram Bot API requiere URLs con protocolo http:// o https:// (wa.me)
+            clean_phone = telefono.replace("+", "")
             keyboard.append([
-                InlineKeyboardButton(f"📞 Llamar a {nombre}", url=f"tel:{telefono}"),
-                InlineKeyboardButton(f"💬 Mensaje a {nombre}", url=f"https://wa.me/{telefono.replace('+', '')}?text=Hola%20{nombre},%20estoy%20pasando%20por%20un%20momento%20difícil%20y%20necesito%20apoyo.")
+                InlineKeyboardButton(f"💬 Mensaje a {nombre}", url=f"https://wa.me/{clean_phone}?text=Hola%20{nombre},%20estoy%20pasando%20por%20un%20momento%20difícil%20y%20necesito%20apoyo.")
             ])
     else:
         text_contactos = "\n\n💡 *Tip: Puedes agregar tus contactos de confianza enviando:* `/contacto Nombre Telefono` (ej: `/contacto Gabriel +34600000000`)"
