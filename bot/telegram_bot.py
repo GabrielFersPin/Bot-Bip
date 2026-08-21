@@ -56,10 +56,14 @@ async def calma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             relacion = c.get("relacion", "Apoyo")
             text_contactos += f"• **{nombre}** ({relacion}): `{telefono}`\n"
             
-            # Telegram Bot API requiere URLs con protocolo http:// o https:// (wa.me)
+            # Usar urllib.parse.quote_plus para que WhatsApp formatee los espacios de manera limpia
+            import urllib.parse
+            mensaje_apoyo = f"Hola {nombre}, estoy pasando por un momento difícil y necesito apoyo."
+            mensaje_encoded = urllib.parse.quote_plus(mensaje_apoyo)
+            
             clean_phone = telefono.replace("+", "")
             keyboard.append([
-                InlineKeyboardButton(f"💬 Mensaje a {nombre}", url=f"https://wa.me/{clean_phone}?text=Hola%20{nombre},%20estoy%20pasando%20por%20un%20momento%20difícil%20y%20necesito%20apoyo.")
+                InlineKeyboardButton(f"💬 Mensaje a {nombre}", url=f"https://wa.me/{clean_phone}?text={mensaje_encoded}")
             ])
     else:
         text_contactos = "\n\n💡 *Tip: Puedes agregar tus contactos de confianza enviando:* `/contacto Nombre Telefono` (ej: `/contacto Gabriel +34600000000`)"
