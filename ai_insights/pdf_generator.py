@@ -94,46 +94,60 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
         pdf.text(gx + 90, gy - 2, "[---] Sueno (Horas)")
         pdf.set_text_color(30, 41, 59)
 
-        # Dibujar lineas de la grafica si hay registros
+        # Dibujar puntos y líneas de la gráfica
         df_chart = df.sort_values("fecha") if "fecha" in df.columns else df
         n_points = len(df_chart)
 
-        if n_points > 1:
-            step_x = gw / (n_points - 1)
+        if n_points >= 1:
+            step_x = (gw / (n_points - 1)) if n_points > 1 else (gw / 2)
             pts_e, pts_h, pts_s = [], [], []
 
             for i, (_, row) in enumerate(df_chart.iterrows()):
-                px = gx + (i * step_x)
-                # Escalar 1-10 a la altura de la grafica
+                px = (gx + (i * step_x)) if n_points > 1 else (gx + gw / 2)
                 e_val = float(row.get("energia", 5))
                 h_val = float(row.get("humor", 5))
                 s_val = float(row.get("sueno_horas", 8))
 
                 py_e = gy + gh - (e_val / 10.0 * gh)
                 py_h = gy + gh - (h_val / 10.0 * gh)
-                py_s = gy + gh - (min(s_val, 12) / 12.0 * gh) # Escalar sueno hasta 12h
+                py_s = gy + gh - (min(s_val, 12) / 12.0 * gh)
 
                 pts_e.append((px, py_e))
                 pts_h.append((px, py_h))
                 pts_s.append((px, py_s))
 
-            # Dibujar Energia (Rojo)
-            pdf.set_draw_color(239, 68, 68)
-            pdf.set_line_width(0.8)
-            for i in range(len(pts_e) - 1):
-                pdf.line(pts_e[i][0], pts_e[i][1], pts_e[i+1][0], pts_e[i+1][1])
+            # 1. Dibujar Líneas con mayor grosor (1.5mm)
+            if n_points > 1:
+                pdf.set_draw_color(239, 68, 68) # Rojo Energia
+                pdf.set_line_width(1.2)
+                for i in range(len(pts_e) - 1):
+                    pdf.line(pts_e[i][0], pts_e[i][1], pts_e[i+1][0], pts_e[i+1][1])
 
-            # Dibujar Animo (Azul)
-            pdf.set_draw_color(59, 130, 246)
-            pdf.set_line_width(0.8)
-            for i in range(len(pts_h) - 1):
-                pdf.line(pts_h[i][0], pts_h[i][1], pts_h[i+1][0], pts_h[i+1][1])
+                pdf.set_draw_color(59, 130, 246) # Azul Animo
+                pdf.set_line_width(1.2)
+                for i in range(len(pts_h) - 1):
+                    pdf.line(pts_h[i][0], pts_h[i][1], pts_h[i+1][0], pts_h[i+1][1])
 
-            # Dibujar Sueno (Verde)
-            pdf.set_draw_color(16, 185, 129)
-            pdf.set_line_width(0.8)
-            for i in range(len(pts_s) - 1):
-                pdf.line(pts_s[i][0], pts_s[i][1], pts_s[i+1][0], pts_s[i+1][1])
+                pdf.set_draw_color(16, 185, 129) # Verde Sueno
+                pdf.set_line_width(1.2)
+                for i in range(len(pts_s) - 1):
+                    pdf.line(pts_s[i][0], pts_s[i][1], pts_s[i+1][0], pts_s[i+1][1])
+
+            # 2. Dibujar Puntos/Pulsos Destacados Visibles (Radio 2.2mm con relleno)
+            for px, py in pts_e:
+                pdf.set_fill_color(239, 68, 68)
+                pdf.set_draw_color(185, 28, 28)
+                pdf.ellipse(px - 2, py - 2, 4, 4, "DF")
+
+            for px, py in pts_h:
+                pdf.set_fill_color(59, 130, 246)
+                pdf.set_draw_color(29, 78, 216)
+                pdf.ellipse(px - 2, py - 2, 4, 4, "DF")
+
+            for px, py in pts_s:
+                pdf.set_fill_color(16, 185, 129)
+                pdf.set_draw_color(4, 120, 87)
+                pdf.ellipse(px - 2, py - 2, 4, 4, "DF")
 
         pdf.set_y(gy + gh + 6)
 
