@@ -375,14 +375,17 @@ st.dataframe(
 )
 
 try:
-    from ai_insights.pdf_generator import generar_pdf_clinico
-    pdf_bytes = generar_pdf_clinico(filtered_df)
+    import importlib
+    import ai_insights.pdf_generator as pdf_gen_module
+    importlib.reload(pdf_gen_module)
+    pdf_bytes = pdf_gen_module.generar_pdf_clinico(filtered_df)
     st.download_button(
         label="📄 Descargar Informe Clínico (PDF)",
         data=pdf_bytes,
         file_name=f"informe_medico_bienestar_{today.strftime('%Y_%m_%d')}.pdf",
         mime="application/pdf",
-        use_container_width=True
+        use_container_width=True,
+        key=f"pdf_btn_v3_{len(filtered_df)}"
     )
 except Exception as pdf_err:
     st.error(f"⚠️ Error al preparar el PDF: {pdf_err}")
