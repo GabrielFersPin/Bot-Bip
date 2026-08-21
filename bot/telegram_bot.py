@@ -290,14 +290,24 @@ def get_skip_keyboard() -> InlineKeyboardMarkup:
 # ==============================================================================
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Comando /start - Da la bienvenida e inicia el registro diario."""
+    """Comando /start - Da la bienvenida personalizada e inicia el registro diario."""
     user = update.effective_user
     welcome_text = (
-        f"👋 ¡Hola, {user.first_name}!\n\n"
-        "Soy **Bot-Bip**, tu agente personal para registrar tu nivel diario de energía, humor y observaciones.\n\n"
-        "Comenzemos con el registro de hoy. ⚡\n"
-        "**¿Cómo está tu nivel de ENERGÍA hoy?** (Selecciona o escribe un número del 1 al 10):\n"
-        "1 = Exhausto / Sin energía | 10 = Máxima energía / Imparable"
+        f"✨ **¡Hola, {user.first_name}! Te doy la bienvenida a Bot-Bip** 💖\n\n"
+        "Soy tu compañero personal para el seguimiento de tu **estabilidad psicoafectiva y bienestar**.\n\n"
+        "Cada día realizaremos **3 preguntas rápidas** en 10 segundos:\n"
+        "⚡ **1. Nivel de Energía** (1-10)\n"
+        "🎭 **2. Estado de Ánimo / Humor** (1-10)\n"
+        "💤 **3. Horas de Descanso** (Marcador biológico de estabilidad)\n"
+        "📝 *(Opcional)* Notas sobre tu día\n\n"
+        "🛡️ **Herramientas de Apoyo Disponibles:**\n"
+        "• `/calma` - Ejercicios de respiración, anclaje y acceso a tu **Red de Apoyo** (llamadas y mensajes de ayuda).\n"
+        "• `/contacto` - Agregar personas de confianza a tu red de auxilio.\n"
+        "• `/recordatorio` - Configurar tu notificación diaria a la hora que prefieras.\n"
+        "• `/dashboard` - Ver tu panel gráfico y reportes inteligentes de la IA de forma 100% privada.\n\n"
+        "--- \n"
+        "⚡ **Comencemos con hoy: ¿Cómo está tu nivel de ENERGÍA?**\n"
+        "*(1 = Exhausto/a | 10 = Máxima energía)*"
     )
     await update.message.reply_text(
         welcome_text,
@@ -310,9 +320,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 async def registrar_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Comando /registrar - Inicia el flujo de preguntas."""
     text = (
-        "⚡ **Registro Diario**\n\n"
+        "⚡ **Registro Diario de Bienestar**\n\n"
         "**¿Cómo está tu nivel de ENERGÍA hoy?** (1 al 10):\n"
-        "1 = Exhausto | 10 = Plena energía"
+        "*(1 = Exhausto/a | 10 = Plena energía)*"
     )
     await update.message.reply_text(
         text,
@@ -348,11 +358,12 @@ async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /ayuda - Muestra los comandos disponibles."""
     help_text = (
-        "🤖 **Bot-Bip - Comandos Disponibles**\n\n"
-        "• `/registrar` - Iniciar el registro diario de energía y humor.\n"
+        "🤖 **Bot-Bip - Comandos de Apoyo & Registro**\n\n"
+        "• `/registrar` - Iniciar el check-in diario (Energía, Ánimo y Descanso).\n"
+        "• `/calma` - Espacio de relajación y botones de llamada/mensaje a tu **Red de Apoyo**.\n"
+        "• `/contacto` - Agregar personas de confianza (ej: `/contacto Gabriel +34600000000 Pareja`).\n"
+        "• `/recordatorio` - Configurar la hora de tu notificación diaria.\n"
         "• `/dashboard` - Abrir tu panel privado de estadísticas en Telegram.\n"
-        "• `/recordatorio HH:MM` - Configurar recordatorio diario (ej: `/recordatorio 21:00`).\n"
-        "• `/recordatorio_off` - Desactivar el recordatorio diario.\n"
         "• `/cancelar` - Cancelar el registro actual.\n"
         "• `/ayuda` - Ver este mensaje de ayuda."
     )
