@@ -32,7 +32,7 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
     # 1. Información General del Paciente / Periodo
     pdf.set_font("Helvetica", "B", 12)
     pdf.set_text_color(15, 23, 42)
-    pdf.cell(0, 7, f"Resumen Clínico para Consulta Médica", ln=True)
+    pdf.cell(0, 7, "Resumen Clinico para Consulta Medica", ln=True)
     
     pdf.set_font("Helvetica", "", 10)
     fecha_actual = datetime.now().strftime("%d/%m/%Y")
@@ -43,7 +43,7 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
         fechas_ord = pd.to_datetime(df["fecha"]).sort_values()
         periodo_str = f"{fechas_ord.iloc[0].strftime('%d/%m/%Y')} al {fechas_ord.iloc[-1].strftime('%d/%m/%Y')}"
 
-    pdf.multi_cell(0, 6, f"• Fecha de emisión: {fecha_actual}\n• Período evaluado: {periodo_str}\n• Total de evaluaciones registradas: {total_registros}")
+    pdf.multi_cell(0, 6, f"- Fecha de emision: {fecha_actual}\n- Periodo evaluado: {periodo_str}\n- Total de evaluaciones registradas: {total_registros}")
     pdf.ln(4)
 
     # 2. Promedios y Métricas Clave
@@ -68,13 +68,13 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
         pdf.set_fill_color(238, 242, 255) # Indigo soft
         pdf.set_font("Helvetica", "B", 11)
         pdf.set_text_color(49, 46, 129)
-        pdf.cell(0, 8, "  ANÁLISIS DE TENDENCIAS Y PATRONES (AI INSIGHTS)", ln=True, fill=True)
+        pdf.cell(0, 8, "  ANALISIS DE TENDENCIAS Y PATRONES (AI INSIGHTS)", ln=True, fill=True)
         pdf.ln(2)
         
         pdf.set_font("Helvetica", "", 9.5)
         pdf.set_text_color(30, 41, 59)
-        # Limpiar markdown bsico (* y #) para FPDF
-        clean_summary = ai_summary.replace("**", "").replace("###", "").replace("##", "").replace("*", "•")
+        clean_summary = ai_summary.replace("**", "").replace("###", "").replace("##", "").replace("*", "-")
+        clean_summary = clean_summary.encode('latin-1', 'replace').decode('latin-1')
         pdf.multi_cell(0, 5, clean_summary)
         pdf.ln(6)
 
@@ -82,16 +82,16 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
     pdf.set_fill_color(241, 245, 249)
     pdf.set_font("Helvetica", "B", 11)
     pdf.set_text_color(15, 23, 42)
-    pdf.cell(0, 8, "  DETALLE DE REGISTROS DIARIOS Y NOTAS DE SÍNTOMAS", ln=True, fill=True)
+    pdf.cell(0, 8, "  DETALLE DE REGISTROS DIARIOS Y NOTAS DE SINTOMAS", ln=True, fill=True)
     pdf.ln(3)
 
     # Cabecera de Tabla
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_fill_color(226, 232, 240)
     pdf.cell(28, 7, "Fecha", border=1, align="C", fill=True)
-    pdf.cell(22, 7, "Energía", border=1, align="C", fill=True)
-    pdf.cell(22, 7, "Ánimo", border=1, align="C", fill=True)
-    pdf.cell(22, 7, "Sueño", border=1, align="C", fill=True)
+    pdf.cell(22, 7, "Energia", border=1, align="C", fill=True)
+    pdf.cell(22, 7, "Animo", border=1, align="C", fill=True)
+    pdf.cell(22, 7, "Sueno", border=1, align="C", fill=True)
     pdf.cell(96, 7, "Comentarios / Notas del Paciente", border=1, align="L", fill=True)
     pdf.ln(7)
 
@@ -107,9 +107,11 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
         if com_val.lower() == "none" or not com_val:
             com_val = "-"
 
-        # Truncar comentarios si son excesivamente largos para la celda
+        # Truncar comentarios si son muy largos
         if len(com_val) > 65:
             com_val = com_val[:62] + "..."
+
+        com_val = com_val.encode('latin-1', 'replace').decode('latin-1')
 
         pdf.cell(28, 6, f_val, border=1, align="C")
         pdf.cell(22, 6, e_val, border=1, align="C")
