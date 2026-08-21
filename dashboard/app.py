@@ -176,8 +176,12 @@ def fetch_data(user_id=None, start_str=None, end_str=None):
         return pd.DataFrame()
     
     df = pd.DataFrame(registros)
-    df["fecha"] = pd.to_datetime(df["fecha"])
-    df = df.sort_values("fecha").reset_index(drop=True)
+    if "created_at" in df.columns:
+        df["created_at_dt"] = pd.to_datetime(df["created_at"])
+        df = df.sort_values("created_at_dt").reset_index(drop=True)
+    else:
+        df["fecha"] = pd.to_datetime(df["fecha"])
+        df = df.sort_values("fecha").reset_index(drop=True)
     return df
 
 
@@ -260,7 +264,9 @@ chart_df = df.copy()
 
 # Crear etiquetas legibles para el eje X
 if "created_at" in chart_df.columns:
-    chart_df["momento"] = pd.to_datetime(chart_df["created_at"]).dt.strftime("%d/%m %H:%M")
+    # Convertir a marca temporal y ajustar a hora local si viene con UTC
+    chart_df["momento_dt"] = pd.to_datetime(chart_df["created_at"])
+    chart_df["momento"] = chart_df["momento_dt"].dt.tz_localize(None).dt.strftime("%d/%m %H:%M")
 else:
     chart_df["momento"] = pd.to_datetime(chart_df["fecha"]).dt.strftime("%d/%m")
 
@@ -298,34 +304,14 @@ fig.update_layout(
     margin=dict(l=10, r=10, t=10, b=10),
     height=330,
     hovermode="x unified",
-    xaxis=dict(
-        title=None, 
-        showgrid=True, 
-        gridcolor="#334155",
-        fixedrange=True  # Bloquea el zoom/escala en el eje X
-    ),
-    yaxis=dict(
-        title=None, 
-        range=[0, 11], 
-        showgrid=True, 
-        gridcolor="#334155",
-        fixedrange=True  # Bloquea el zoom/escala en el eje Y
-    ),
+    xaxis=dict(title=None, showgrid=True, gridcolor="#334155"),
+    yaxis=dict(title=None, range=[0, 11], showgrid=True, gridcolor="#334155"),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title=None)
 )
 
-fig.update_traces(line=dict(width=3), marker=dict(size=10))
+fig.update_traces(line=dict(width=3), marker=dict(size=9))
 
-# Desactivar interacción de zoom en la configuración del gráfico
-st.plotly_chart(
-    fig, 
-    use_container_width=True, 
-    config={
-        "displayModeBar": False, 
-        "scrollZoom": False,
-        "staticPlot": False
-    }
-)
+st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 # ==============================================================================
 # TABLA DE DATOS HISTÓRICOS Y EXPORTACIÓN
