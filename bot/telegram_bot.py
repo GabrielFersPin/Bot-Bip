@@ -385,9 +385,6 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 # ==============================================================================
-# PASOS DE LA CONVERSACIÓN Y VALIDACIÓN
-# ==============================================================================
-
 async def energia_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Procesa la respuesta de ENERGÍA (vía botón en línea o mensaje de texto)."""
     val = None
@@ -435,98 +432,6 @@ async def energia_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return HUMOR
 
 
-async def humor_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Procesa la respuesta de HUMOR (vía botón en línea o mensaje de texto)."""
-    val = None
-    if update.callback_query:
-        await update.callback_query.answer()
-        data = update.callback_query.data
-        if data.startswith("humor_"):
-            val = int(data.split("_")[1])
-    elif update.message and update.message.text:
-        text = update.message.text.strip()
-        if text.isdigit():
-            val = int(text)
-
-    # Validar entrada
-    if val is None or not (1 <= val <= 10):
-        msg = "⚠️ Por favor, ingresa un número válido entre **1 y 10** para el humor."
-        if update.callback_query:
-            await update.callback_query.edit_message_text(msg, parse_mode="Markdown", reply_markup=get_rating_keyboard("humor"))
-        else:
-            await update.message.reply_text(msg, parse_mode="Markdown", reply_markup=get_rating_keyboard("humor"))
-        return HUMOR
-
-    # Guardar en contexto
-    context.user_data["humor"] = val
-
-    comment_text = (
-        f"✅ Humor guardado: **{val}/10**\n\n"
-        "📝 **¿Quieres agregar algún comentario u observación sobre tu día?**\n"
-        "(Escribe tus notas en un mensaje o presiona el botón para omitir):"
-    )
-
-    if update.callback_query:
-        await update.callback_query.edit_message_text(
-            comment_text,
-            parse_mode="Markdown",
-            reply_markup=get_skip_keyboard()
-        )
-    else:
-        await update.message.reply_text(
-            comment_text,
-            parse_mode="Markdown",
-            reply_markup=get_skip_keyboard()
-        )
-
-    return COMENTARIOS
-
-
-async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Procesa el comentario final y guarda todo en Supabase."""
-    user_id = update.effective_user.id
-    comentario = ""
-
-    if update.callback_query:
-        await update.callback_query.answer()
-        if update.callback_query.data == "skip_comments":
-            comentario = ""
-    elif update.message and update.message.text:
-        comentario = update.message.text.strip()
-
-    energia = context.user_data.get("energia", 5)
-    humor = context.user_data.get("humor", 5)
-
-    # Guardar en Supabase usando el agente de base de datos
-    result = db.guardar_registro_diario(
-        user_id=user_id,
-        energia=energia,
-        humor=humor,
-        comentarios=comentario
-    )
-
-    context.user_data.clear()
-
-    if result.get("success"):
-        summary_text = (
-            "🎉 **¡Registro Guardado con Éxito!**\n\n"
-            f"⚡ **Energía:** {energia}/10\n"
-            f"🎭 **Humor:** {humor}/10\n"
-            f"📝 **Comentario:** {comentario if comentario else 'Sin comentarios'}\n\n"
-            "¡Gracias por registrar tu día! Puedes ver tus estadísticas en el Dashboard."
-        )
-    else:
-        summary_text = (
-            "❌ Hubo un inconveniente al guardar tu registro en la base de datos.\n"
-            f"Detalle: `{result.get('error')}`"
-        )
-
-    if update.callback_query:
-        await update.callback_query.edit_message_text(summary_text, parse_mode="Markdown")
-    else:
-        await update.message.reply_text(summary_text, parse_mode="Markdown")
-
-    return ConversationHandler.END
 
 
 # ==============================================================================
