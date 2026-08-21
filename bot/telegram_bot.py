@@ -8,7 +8,8 @@ from telegram import (
     Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    ReplyKeyboardRemove
+    ReplyKeyboardRemove,
+    BotCommand
 )
 from telegram.ext import (
     ApplicationBuilder,
@@ -704,6 +705,21 @@ async def test_recordatorio_command(update: Update, context: ContextTypes.DEFAUL
 # INICIALIZACIÓN DEL BOT
 # ==============================================================================
 
+async def setup_bot_commands(app) -> None:
+    """Configura los comandos visibles en el botón azul de Menú de Telegram."""
+    commands = [
+        BotCommand("registrar", "⚡ Iniciar check-in diario de bienestar"),
+        BotCommand("informe", "📄 Descargar Informe Clínico en PDF"),
+        BotCommand("resumen_semanal", "🌸 Ver promedios de la semana"),
+        BotCommand("dashboard", "📊 Abrir Panel con gráficos completos"),
+        BotCommand("calma", "💙 Espacio de relax y Red de Apoyo"),
+        BotCommand("contacto", "🤝 Agregar persona de confianza"),
+        BotCommand("recordatorio", "⏰ Configurar hora de notificación"),
+        BotCommand("ayuda", "❓ Ver guía de ayuda y comandos")
+    ]
+    await app.bot.set_my_commands(commands)
+
+
 def main():
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     if not token:
@@ -711,7 +727,7 @@ def main():
         print("Error: Define TELEGRAM_BOT_TOKEN en tu archivo .env para iniciar el bot.")
         return
 
-    app = ApplicationBuilder().token(token).build()
+    app = ApplicationBuilder().token(token).post_init(setup_bot_commands).build()
 
     # Configuración del ConversationHandler
     conv_handler = ConversationHandler(
