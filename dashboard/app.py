@@ -302,16 +302,42 @@ fig.update_layout(
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(0,0,0,0)",
     margin=dict(l=10, r=10, t=10, b=10),
-    height=330,
+    height=340,
     hovermode="x unified",
-    xaxis=dict(title=None, showgrid=True, gridcolor="#334155"),
-    yaxis=dict(title=None, range=[0, 11], showgrid=True, gridcolor="#334155"),
+    dragmode=False,  # Desactiva totalmente el gesto de arrastrar/hacer zoom con el dedo
+    xaxis=dict(
+        title=None, 
+        showgrid=True, 
+        gridcolor="#334155",
+        fixedrange=True, # Bloquea el reescalado en el eje X
+        type="category"
+    ),
+    yaxis=dict(
+        title=None, 
+        range=[0, 11], 
+        showgrid=True, 
+        gridcolor="#334155",
+        fixedrange=True  # Bloquea el reescalado en el eje Y
+    ),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title=None)
 )
 
-fig.update_traces(line=dict(width=3), marker=dict(size=9))
+fig.update_traces(
+    line=dict(width=3), 
+    marker=dict(size=12, symbol="circle", opacity=1)
+)
 
-st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+st.plotly_chart(
+    fig, 
+    use_container_width=True, 
+    config={
+        "displayModeBar": False, 
+        "scrollZoom": False,
+        "doubleClick": False,
+        "showAxisDragHandles": False,
+        "staticPlot": False
+    }
+)
 
 # ==============================================================================
 # TABLA DE DATOS HISTÓRICOS Y EXPORTACIÓN
