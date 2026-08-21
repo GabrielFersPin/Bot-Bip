@@ -240,6 +240,14 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             "Sé amable contigo mismo/a. Si lo necesitas, busca a personas de confianza o usa el comando `/calma`."
         )
 
+    url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
+    url_personalizada = f"{url_base}?user_id={user_id}"
+
+    from telegram import WebAppInfo
+    btn_dashboard = InlineKeyboardMarkup([[
+        InlineKeyboardButton("🌸 Ver Mi Resumen de Bienestar", web_app=WebAppInfo(url=url_personalizada))
+    ]])
+
     if result.get("success"):
         summary_text = (
             "🎉 **¡Registro Guardado con Éxito!**\n\n"
@@ -249,16 +257,18 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             f"📝 **Notas:** {comentario if comentario else 'Sin comentarios'}"
             f"{alerta_text}"
         )
+        reply_markup = btn_dashboard
     else:
         summary_text = (
             "❌ Hubo un inconveniente al guardar tu registro en la base de datos.\n"
             f"Detalle: `{result.get('error')}`"
         )
+        reply_markup = None
 
     if update.callback_query:
-        await update.callback_query.edit_message_text(summary_text, parse_mode="Markdown")
+        await update.callback_query.edit_message_text(summary_text, parse_mode="Markdown", reply_markup=reply_markup)
     else:
-        await update.message.reply_text(summary_text, parse_mode="Markdown")
+        await update.message.reply_text(summary_text, parse_mode="Markdown", reply_markup=reply_markup)
 
     return ConversationHandler.END
 
@@ -652,6 +662,9 @@ def main():
             CommandHandler("registrar", registrar_command),
             CallbackQueryHandler(registrar_command, pattern="^iniciar_registro_ahora$")
         ],
+        per_chat=True,
+        per_user=True,
+        per_message=False,
         states={
             ENERGIA: [
                 CallbackQueryHandler(energia_step, pattern="^energia_"),

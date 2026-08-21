@@ -65,8 +65,21 @@ class SupabaseManager:
             logger.info(f"Registro diario guardado exitosamente para usuario {user_id} en fecha {fecha_str}.")
             return {"success": True, "data": response.data}
         except Exception as e:
-            logger.error(f"Error al guardar registro en Supabase: {str(e)}")
-            return {"success": False, "error": str(e)}
+            err_msg = str(e)
+            if "sueno_horas" in err_msg or "PGRST204" in err_msg:
+                logger.warning("La columna 'sueno_horas' aún no existe en Supabase. Guardando sin la columna sueno_horas...")
+                data_legacy = data.copy()
+                data_legacy.pop("sueno_horas", None)
+                try:
+                    res_legacy = self.client.table("registros_diarios").upsert(
+                        data_legacy, on_conflict="user_id,fecha"
+                    ).execute()
+                    return {"success": True, "data": res_legacy.data}
+                except Exception as e2:
+                    return {"success": False, "error": str(e2)}
+
+            logger.error(f"Error al guardar registro en Supabase: {err_msg}")
+            return {"success": False, "error": err_msg}
 
     def obtener_registros(
         self,
