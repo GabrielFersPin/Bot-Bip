@@ -50,3 +50,11 @@ Este proyecto está organizado en 4 agentes/módulos especializados para facilit
   - Generar un reporte detallado con la causa raíz y la **solución propuesta**.
   - Notificar y solicitar **confirmación del usuario** antes de aplicar cualquier acción correctiva.
 
+---
+
+## 6. 🧠 AI Insights & Analytics Agent (`ai_insights/`)
+- **Script principal:** [`ai_insights/ai_agent.py`](file:///home/gabriel/Bot-Bip/ai_insights/ai_agent.py)
+- **Responsabilidades:**
+  - Analizar las tendencias históricas de bienestar (energía, humor y comentarios) utilizando Modelos de Lenguaje (LLM como Google Gemini).
+  - Generar reportes analíticos estructurados, detección de patrones y recomendaciones personalizadas.
+  - Integración modular con el Dashboard para consumo bajo demanda.

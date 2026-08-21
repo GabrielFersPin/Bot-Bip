@@ -374,3 +374,34 @@ st.download_button(
     file_name=f"registros_bot_bip_{today.strftime('%Y%m%d')}.csv",
     mime="text/csv"
 )
+
+# ==============================================================================
+# INTEGRACIÓN DEL AI INSIGHTS AGENT (LLM REASONING)
+# ==============================================================================
+
+st.markdown("---")
+st.subheader("🧠 AI Insights Agent (Diagnóstico de Bienestar con LLM)")
+
+col_ai_info, col_ai_btn = st.columns([3, 1])
+
+with col_ai_info:
+    st.write(
+        "Haz clic en el botón para solicitar a nuestro **AI Insights Agent** (impulsado por Google Gemini LLM) "
+        "que analice tus tendencias de humor, energía y notas personales."
+    )
+
+with col_ai_btn:
+    generar_reporte = st.button("✨ Generar Informe con IA", use_container_width=True)
+
+if generar_reporte:
+    with st.spinner("🤖 El AI Agent está analizando tus patrones de bienestar con LLM..."):
+        try:
+            from ai_insights.ai_agent import AIInsightsAgent
+            agent = AIInsightsAgent()
+            reporte_markdown = agent.analizar_tendencias(filtered_df.to_dict(orient="records"))
+            
+            st.markdown("### 📝 Reporte de Bienestar de la IA")
+            st.info(reporte_markdown)
+        except Exception as e:
+            st.error(f"Error al invocar el AI Agent: {e}")
+

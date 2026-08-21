@@ -104,6 +104,46 @@ class HealthSupervisorAgent:
             }
         return {"agent": "Dashboard Agent", "status": "OK", "details": "Script dashboard/app.py encontrado y listo."}
 
+    def check_ai_insights_agent(self) -> Dict[str, Any]:
+        """Comprueba la disponibilidad del AI Insights LLM Agent."""
+        api_key = os.getenv("GEMINI_API_KEY") or os.getenv("LLM_API_KEY")
+        if not api_key:
+            return {
+                "agent": "AI Insights & Analytics Agent (LLM)",
+                "status": "WARN",
+                "details": "LLM disponible, pero falta la variable GEMINI_API_KEY en .env.",
+                "proposed_fix": "Obtener una API Key gratuita en Google AI Studio y añadir GEMINI_API_KEY en .env para habilitar diagnósticos con IA."
+            }
+        return {
+            "agent": "AI Insights & Analytics Agent (LLM)",
+            "status": "OK",
+            "details": "API Key de LLM configurada y lista para generar reportes inteligentes."
+        }
+
+    def _generar_diagnostico_llm(self, failures: list) -> str:
+        """Utiliza Google Gemini para analizar los errores recopilados y proponer soluciones inteligentes."""
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return ""
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            
+            prompt = f"""
+Eres un Agente Supervisor de Sistemas Senior experto en DevOps y Python.
+Se han producido los siguientes fallos en los agentes del sistema Bot-Bip:
+
+ERRORES DETECTADOS:
+{failures}
+
+Genera un diagnóstico conciso, analizando las posibles causas raíz interconectadas y sugiriendo el paso exacto que debe realizar el usuario para solucionarlo de forma segura.
+"""
+            response = model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            return f"(No se pudo generar diagnóstico extendido por LLM: {str(e)})"
+
     def run_health_check(self) -> bool:
         """Ejecuta la supervisión completa de todos los agentes."""
         print("🔍 [SUPERVISOR AGENT] Iniciando diagnóstico del sistema Bot-Bip...\n")
@@ -111,13 +151,19 @@ class HealthSupervisorAgent:
         results = [
             self.check_database_agent(),
             self.check_telegram_bot_agent(),
-            self.check_dashboard_agent()
+            self.check_dashboard_agent(),
+            self.check_ai_insights_agent()
         ]
 
         failures = [r for r in results if r["status"] == "FAIL"]
 
         for r in results:
-            symbol = "✅" if r["status"] == "OK" else "❌"
+            if r["status"] == "OK":
+                symbol = "✅"
+            elif r["status"] == "WARN":
+                symbol = "⚠️"
+            else:
+                symbol = "❌"
             print(f"{symbol} [{r['agent']}] {r['details']}")
 
         if not failures:
@@ -125,7 +171,7 @@ class HealthSupervisorAgent:
             return True
 
         print("\n⚠️ [SUPERVISOR AGENT] ¡Se han detectado fallos en los agentes!")
-        print("📢 Comunicando el diagnóstico entre los agentes y preparando informe para el usuario...\n")
+        print("🧠 [LLM REASONING] Consultando a la IA para un diagnóstico avanzado de fallas...\n")
 
         for f in failures:
             print("----------------------------------------------------------------------")
@@ -133,6 +179,12 @@ class HealthSupervisorAgent:
             print(f"📄 Detalles: {f['details']}")
             print(f"💡 SOLUCIÓN PROPUESTA: {f['proposed_fix']}")
             print("----------------------------------------------------------------------")
+
+        # Razonamiento inteligente impulsado por LLM
+        diagnostico_ia = self._generar_diagnostico_llm(failures)
+        if diagnostico_ia:
+            print("\n🤖 [ANÁLISIS DE CAUSA RAÍZ POR LLM]:")
+            print(diagnostico_ia)
 
         print("\n🛑 ATENCIÓN AL USUARIO:")
         print("Antes de aplicar cualquier corrección, se requiere tu autorización.")

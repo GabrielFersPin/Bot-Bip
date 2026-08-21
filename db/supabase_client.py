@@ -16,23 +16,21 @@ class SupabaseManager:
     """
     def __init__(self, use_service_role: bool = False):
         self.url: str = os.getenv("SUPABASE_URL", "")
-        self.anon_key: str = os.getenv("SUPABASE_ANON_KEY", "")
-        self.service_role_key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        self.anon_key: str = os.getenv("SUPABASE_ANON_KEY", "") or os.getenv("SUPABASE_PUBLISHABLE_KEY", "")
+        self.service_role_key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")
 
         if not self.url:
             raise ValueError("Error: SUPABASE_URL no está configurada en las variables de entorno.")
 
-        # Selección de clave según responsabilidad de agente:
-        # Service Role Key para backend/bot (bypasses RLS para administración segura)
-        # Anon Key para visualización frontend / cliente Streamlit
+        # Selección de clave según responsabilidad de agente
         if use_service_role and self.service_role_key:
             self.key = self.service_role_key
-            logger.info("Conectando a Supabase usando Service Role Key (Privilegios elevados).")
+            logger.info("Conectando a Supabase usando Service Role / Secret Key.")
         elif self.anon_key:
             self.key = self.anon_key
-            logger.info("Conectando a Supabase usando Anon Key.")
+            logger.info("Conectando a Supabase usando Anon / Publishable Key.")
         else:
-            raise ValueError("Error: No se encontró una clave API válida de Supabase (SUPABASE_ANON_KEY o SUPABASE_SERVICE_ROLE_KEY).")
+            raise ValueError("Error: No se encontró una clave API válida de Supabase.")
 
         self.client: Client = create_client(self.url, self.key)
 
@@ -119,13 +117,19 @@ def check_db_connection() -> bool:
     """Verifica la conectividad básica con Supabase."""
     try:
         url = os.getenv("SUPABASE_URL", "")
-        key = os.getenv("SUPABASE_ANON_KEY", "") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        key = (
+            os.getenv("SUPABASE_ANON_KEY", "")
+            or os.getenv("SUPABASE_PUBLISHABLE_KEY", "")
+            or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+            or os.getenv("SUPABASE_SECRET_KEY", "")
+        )
         if not url or not key:
             return False
         client = create_client(url, key)
         # Intento de consulta ligera
         client.table("registros_diarios").select("id").limit(1).execute()
         return True
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG SUPABASE ERROR: {type(e).__name__} - {str(e)}")
         return False
 
