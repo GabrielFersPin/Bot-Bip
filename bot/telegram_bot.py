@@ -41,12 +41,33 @@ def get_sueno_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 async def calma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Comando /calma - Espacio de apoyo rápido para momentos de sobreestimulación o ansiedad."""
+    """Comando /calma - Espacio de apoyo rápido con acceso directo a la Red de Apoyo."""
+    user_id = update.effective_user.id
+    contactos = db.obtener_contactos_emergencia(user_id)
+
+    keyboard = []
+    text_contactos = ""
+
+    if contactos:
+        text_contactos = "\n\n🤝 **Tu Red de Apoyo de Confianza:**\n"
+        for c in contactos:
+            nombre = c.get("nombre")
+            telefono = c.get("telefono", "").replace(" ", "").replace("-", "")
+            text_contactos += f"• **{nombre}** ({c.get('relacion')}): `{telefono}`\n"
+            
+            # Crear botones interactivos con enlace directo tel: y WhatsApp
+            keyboard.append([
+                InlineKeyboardButton(f"📞 Llamar a {nombre}", url=f"tel:{telefono}"),
+                InlineKeyboardButton(f"💬 Mensaje a {nombre}", url=f"https://wa.me/{telefono.replace('+', '')}?text=Hola%20{nombre},%20estoy%20pasando%20por%20un%20momento%20difícil%20y%20necesito%20apoyo.")
+            ])
+    else:
+        text_contactos = "\n\n💡 *Tip: Puedes agregar tus contactos de confianza enviando:* `/contacto Nombre Telefono` (ej: `/contacto Gabriel +34600000000`)"
+
     calma_text = (
-        "💙 **Espacio de Calma & Grounding** 🌿\n\n"
+        "💙 **Espacio de Calma & Red de Apoyo** 🌿\n\n"
         "Tómate un momento. Estás a salvo. Vamos a conectar con el presente:\n\n"
         "🌬️ **Técnica 4-7-8 de Respiración:**\n"
-        "1. Inhala suavemente por la nariz contando hasta **4**.\n"
+        "1. Inhala por la nariz contando hasta **4**.\n"
         "2. Mantén el aire contando hasta **7**.\n"
         "3. Exhala despacio por la boca contando hasta **8**.\n\n"
         "👁️ **Técnica 5-4-3-2-1 de Anclaje:**\n"
@@ -56,8 +77,43 @@ async def calma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "• Nombra **2 olores** que percibas.\n"
         "• Nombra **1 emoción** que sientas sin juzgarla.\n\n"
         "💊 *Recordatorio amable: ¿Has tomado tu medicación habitual de hoy?*"
+        f"{text_contactos}"
     )
-    await update.message.reply_text(calma_text, parse_mode="Markdown")
+
+    reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
+    await update.message.reply_text(calma_text, parse_mode="Markdown", reply_markup=reply_markup)
+
+
+async def agregar_contacto_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Comando /contacto - Permite registrar un número de teléfono de la red de apoyo."""
+    user_id = update.effective_user.id
+    if not context.args or len(context.args) < 2:
+        await update.message.reply_text(
+            "⚠️ **Formato para agregar contacto:**\n"
+            "`/contacto Nombre Telefono [Relacion]`\n\n"
+            "Ejemplo:\n`/contacto Gabriel +34600000000 Pareja`\n"
+            "`/contacto Dra.Ramos +34611111111 Terapeuta`",
+            parse_mode="Markdown"
+        )
+        return
+
+    nombre = context.args[0]
+    telefono = context.args[1]
+    relacion = context.args[2] if len(context.args) > 2 else "Red de Apoyo"
+
+    res = db.guardar_contacto_emergencia(user_id=user_id, nombre=nombre, telefono=telefono, relacion=relacion)
+
+    if res.get("success"):
+        await update.message.reply_text(
+            f"✅ **Contacto añadido a tu Red de Apoyo:**\n"
+            f"👤 **Nombre:** {nombre}\n"
+            f"📞 **Teléfono:** `{telefono}`\n"
+            f"🏷️ **Relación:** {relacion}\n\n"
+            "Ahora aparecerá con botones de llamada y mensaje directo al usar `/calma`.",
+            parse_mode="Markdown"
+        )
+    else:
+        await update.message.reply_text(f"❌ Error al guardar contacto: `{res.get('error')}`", parse_mode="Markdown")
 
 
 async def humor_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -615,6 +671,7 @@ def main():
     app.add_handler(CallbackQueryHandler(horario_callback_handler, pattern="^(set_hora_|iniciar_registro_ahora)"))
     app.add_handler(CommandHandler("dashboard", dashboard_command))
     app.add_handler(CommandHandler("calma", calma_command))
+    app.add_handler(CommandHandler("contacto", agregar_contacto_command))
     app.add_handler(CommandHandler("ayuda", help_command))
     app.add_handler(CommandHandler("recordatorio", set_recordatorio_command))
     app.add_handler(CommandHandler("recordatorio_off", remove_recordatorio_command))

@@ -71,7 +71,17 @@ FOR UPDATE
 TO anon, authenticated
 USING (true);
 
--- Comentario explicativo sobre Service Role Key vs Anon Key:
--- Anon Key: Diseñada para operaciones cliente (ej. Dashboard de Streamlit). Respeta RLS.
--- Service Role Key: Clave secreta con privilegios de Administrador (Bypasses RLS).
---                    Debe usarse únicamente en entornos de servidor seguros (ej. el backend del Bot de Telegram).
+-- ==============================================================================
+-- Tabla: contactos_emergencia (Red de Apoyo)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.contactos_emergencia (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id BIGINT NOT NULL,                           -- ID de usuario de Telegram
+    nombre VARCHAR(100) NOT NULL,                      -- Nombre del contacto (ej: "Gabriel", "Mamá", "Dr. Ramos")
+    telefono VARCHAR(50) NOT NULL,                     -- Teléfono (ej: +34600000000)
+    relacion VARCHAR(50) DEFAULT 'Red de Apoyo',       -- Relación (ej: Pareja, Familiar, Terapeuta)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.contactos_emergencia ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Permitir acceso a contactos" ON public.contactos_emergencia FOR ALL TO anon, authenticated USING (true);

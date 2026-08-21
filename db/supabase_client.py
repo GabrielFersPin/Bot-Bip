@@ -110,6 +110,30 @@ class SupabaseManager:
             logger.error(f"Error al obtener usuarios únicos: {str(e)}")
             return []
 
+    def guardar_contacto_emergencia(self, user_id: int, nombre: str, telefono: str, relacion: str = "Red de Apoyo") -> Dict[str, Any]:
+        """Guarda un contacto de confianza en la red de apoyo del usuario."""
+        try:
+            data = {
+                "user_id": user_id,
+                "nombre": nombre,
+                "telefono": telefono,
+                "relacion": relacion
+            }
+            response = self.client.table("contactos_emergencia").insert(data).execute()
+            return {"success": True, "data": response.data}
+        except Exception as e:
+            logger.error(f"Error al guardar contacto de emergencia: {str(e)}")
+            return {"success": False, "error": str(e)}
+
+    def obtener_contactos_emergencia(self, user_id: int) -> List[Dict[str, Any]]:
+        """Obtiene la lista de contactos de confianza de un usuario."""
+        try:
+            response = self.client.table("contactos_emergencia").select("*").eq("user_id", user_id).execute()
+            return response.data or []
+        except Exception as e:
+            logger.error(f"Error al obtener contactos de emergencia: {str(e)}")
+            return []
+
 
 # Instancia por defecto para importar fácilmente
 def get_db_client(use_service_role: bool = False) -> SupabaseManager:
