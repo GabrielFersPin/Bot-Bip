@@ -18,8 +18,8 @@ from db.supabase_client import get_db_client
 # ==============================================================================
 
 st.set_page_config(
-    page_title="Bot-Bip | Analytics Dashboard",
-    page_icon="📊",
+    page_title="Bot-Bip | Resumen de Bienestar",
+    page_icon="🌸",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -114,9 +114,9 @@ db = init_db()
 
 st.markdown("""
 <div class="dashboard-header">
-    <h1 class="dashboard-title">📊 Bot-Bip Analytics & Dashboard</h1>
+    <h1 class="dashboard-title">🌸 Resumen de Bienestar</h1>
     <p style="color: #94a3b8; margin-top: 8px; margin-bottom: 0;">
-        Plataforma analítica de seguimiento diario de Energía y Estado de Ánimo.
+        Espacio personal para el seguimiento de tu estabilidad, estado de ánimo y descanso.
     </p>
 </div>
 """, unsafe_allow_html=True)
