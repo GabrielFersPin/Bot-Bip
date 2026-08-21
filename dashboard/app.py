@@ -21,13 +21,20 @@ st.set_page_config(
     page_title="Bot-Bip | Analytics Dashboard",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Estilos CSS personalizados para diseño premium
 st.markdown("""
     <style>
-    /* Estilos generales */
+    /* Optimizar espacios para pantallas móviles */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 0.8rem !important;
+        padding-right: 0.8rem !important;
+    }
+    
     .main {
         background-color: #0f172a;
         color: #f8fafc;
@@ -279,11 +286,12 @@ fig.update_layout(
     template="plotly_dark",
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(15,23,42,0.6)",
-    height=400,
-    margin=dict(l=20, r=20, t=30, b=20),
-    yaxis=dict(range=[0, 10.5], title="Escala de Bienestar (1-10)"),
-    xaxis=dict(title="Fecha"),
-    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    height=520,  # Aumentado de 400px a 520px para mejor visualización en pantallas verticales móviles
+    margin=dict(l=10, r=10, t=40, b=10),
+    font=dict(size=14),
+    yaxis=dict(range=[0.5, 10.5], title="Escala (1-10)", dtick=1),
+    xaxis=dict(title="Fecha", showgrid=True),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5)
 )
 
 st.plotly_chart(fig, use_container_width=True)
