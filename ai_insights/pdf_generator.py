@@ -61,7 +61,81 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
         pdf.cell(63, 7, f"Energia Promedio: {prom_energia}/10", border=1, align="C")
         pdf.cell(63, 7, f"Animo Promedio: {prom_humor}/10", border=1, align="C")
         pdf.cell(64, 7, f"Sueno Promedio: {prom_sueno}h", border=1, align="C")
-        pdf.ln(10)
+        pdf.ln(12)
+
+        # 2b. Grafica de Evolución Temporal (Efecto Vectorial)
+        pdf.set_fill_color(248, 250, 252)
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.cell(0, 7, "  GRAFICA DE EVOLUCION Y TENDENCIA DE BIENESTAR", ln=True, fill=True)
+        pdf.ln(2)
+
+        # Marco del grafico
+        gx = 15
+        gy = pdf.get_y() + 2
+        gw = 180
+        gh = 45
+
+        pdf.set_draw_color(203, 213, 225)
+        pdf.set_line_width(0.3)
+        pdf.rect(gx, gy, gw, gh)
+
+        # Grid lines (0, 5, 10)
+        pdf.set_draw_color(241, 245, 249)
+        pdf.set_line_width(0.2)
+        pdf.line(gx, gy + gh/2, gx + gw, gy + gh/2)
+
+        # Leyenda
+        pdf.set_font("Helvetica", "", 8)
+        pdf.set_text_color(239, 68, 68) # Rojo Energia
+        pdf.text(gx + 5, gy - 2, "[---] Energia")
+        pdf.set_text_color(59, 130, 246) # Azul Animo
+        pdf.text(gx + 50, gy - 2, "[---] Animo")
+        pdf.set_text_color(16, 185, 129) # Verde Sueno
+        pdf.text(gx + 90, gy - 2, "[---] Sueno (Horas)")
+        pdf.set_text_color(30, 41, 59)
+
+        # Dibujar lineas de la grafica si hay registros
+        df_chart = df.sort_values("fecha") if "fecha" in df.columns else df
+        n_points = len(df_chart)
+
+        if n_points > 1:
+            step_x = gw / (n_points - 1)
+            pts_e, pts_h, pts_s = [], [], []
+
+            for i, (_, row) in enumerate(df_chart.iterrows()):
+                px = gx + (i * step_x)
+                # Escalar 1-10 a la altura de la grafica
+                e_val = float(row.get("energia", 5))
+                h_val = float(row.get("humor", 5))
+                s_val = float(row.get("sueno_horas", 8))
+
+                py_e = gy + gh - (e_val / 10.0 * gh)
+                py_h = gy + gh - (h_val / 10.0 * gh)
+                py_s = gy + gh - (min(s_val, 12) / 12.0 * gh) # Escalar sueno hasta 12h
+
+                pts_e.append((px, py_e))
+                pts_h.append((px, py_h))
+                pts_s.append((px, py_s))
+
+            # Dibujar Energia (Rojo)
+            pdf.set_draw_color(239, 68, 68)
+            pdf.set_line_width(0.8)
+            for i in range(len(pts_e) - 1):
+                pdf.line(pts_e[i][0], pts_e[i][1], pts_e[i+1][0], pts_e[i+1][1])
+
+            # Dibujar Animo (Azul)
+            pdf.set_draw_color(59, 130, 246)
+            pdf.set_line_width(0.8)
+            for i in range(len(pts_h) - 1):
+                pdf.line(pts_h[i][0], pts_h[i][1], pts_h[i+1][0], pts_h[i+1][1])
+
+            # Dibujar Sueno (Verde)
+            pdf.set_draw_color(16, 185, 129)
+            pdf.set_line_width(0.8)
+            for i in range(len(pts_s) - 1):
+                pdf.line(pts_s[i][0], pts_s[i][1], pts_s[i+1][0], pts_s[i+1][1])
+
+        pdf.set_y(gy + gh + 6)
 
     # 3. Resumen Interpretativo / Diagnóstico con IA (Si está presente)
     if ai_summary:
