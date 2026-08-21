@@ -374,13 +374,14 @@ st.dataframe(
     }
 )
 
-# Botón para descargar CSV
-csv_data = filtered_df.to_csv(index=False).encode('utf-8')
+# Botón para descargar CSV optimizado para móviles y Excel (UTF-8 con BOM)
+csv_data = filtered_df.to_csv(index=False).encode('utf-8-sig')
 st.download_button(
-    label="📥 Descargar Histórico (CSV)",
+    label="📥 Descargar Mi Histórico (.csv)",
     data=csv_data,
-    file_name=f"registros_bot_bip_{today.strftime('%Y%m%d')}.csv",
-    mime="text/csv"
+    file_name=f"historico_bienestar_{today.strftime('%Y_%m_%d')}.csv",
+    mime="text/csv",
+    use_container_width=True
 )
 
 # ==============================================================================
