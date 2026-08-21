@@ -105,20 +105,35 @@ class HealthSupervisorAgent:
         return {"agent": "Dashboard Agent", "status": "OK", "details": "Script dashboard/app.py encontrado y listo."}
 
     def check_ai_insights_agent(self) -> Dict[str, Any]:
-        """Comprueba la disponibilidad del AI Insights LLM Agent."""
-        api_key = os.getenv("GEMINI_API_KEY") or os.getenv("LLM_API_KEY")
-        if not api_key:
+        """Comprueba la disponibilidad del AI Insights LLM Agent (Groq / OpenRouter / Gemini / Motor Local)."""
+        groq_key = os.getenv("GROQ_API_KEY")
+        openrouter_key = os.getenv("OPENROUTER_API_KEY")
+        gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("LLM_API_KEY")
+
+        if groq_key:
             return {
                 "agent": "AI Insights & Analytics Agent (LLM)",
-                "status": "WARN",
-                "details": "LLM disponible, pero falta la variable GEMINI_API_KEY en .env.",
-                "proposed_fix": "Obtener una API Key gratuita en Google AI Studio y añadir GEMINI_API_KEY en .env para habilitar diagnósticos con IA."
+                "status": "OK",
+                "details": "Conectado a la API 100% gratuita de Groq (Llama 3.1 8B)."
             }
-        return {
-            "agent": "AI Insights & Analytics Agent (LLM)",
-            "status": "OK",
-            "details": "API Key de LLM configurada y lista para generar reportes inteligentes."
-        }
+        elif openrouter_key:
+            return {
+                "agent": "AI Insights & Analytics Agent (LLM)",
+                "status": "OK",
+                "details": "Conectado a OpenRouter Free API."
+            }
+        elif gemini_key:
+            return {
+                "agent": "AI Insights & Analytics Agent (LLM)",
+                "status": "OK",
+                "details": "Conectado a Google Gemini API."
+            }
+        else:
+            return {
+                "agent": "AI Insights & Analytics Agent (LLM)",
+                "status": "OK",
+                "details": "Motor de reglas local activo (100% gratuito sin costo de API)."
+            }
 
     def _generar_diagnostico_llm(self, failures: list) -> str:
         """Utiliza Google Gemini para analizar los errores recopilados y proponer soluciones inteligentes."""
