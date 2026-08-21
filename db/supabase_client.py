@@ -48,7 +48,7 @@ class SupabaseManager:
         """
         fecha_str = (fecha_registro or date.today()).isoformat()
 
-        from datetime import datetime
+        from datetime import datetime, timezone
         data = {
             "user_id": user_id,
             "fecha": fecha_str,
@@ -56,7 +56,7 @@ class SupabaseManager:
             "humor": humor,
             "sueno_horas": sueno_horas,
             "comentarios": comentarios,
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
 
         try:

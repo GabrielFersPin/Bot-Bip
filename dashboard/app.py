@@ -163,7 +163,7 @@ st.sidebar.info("💡 **Consejo:** Registra tus datos diariamente en Telegram co
 # CARGA Y PROCESAMIENTO DE DATOS
 # ==============================================================================
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=0)
 def fetch_data(user_id=None, start_str=None, end_str=None):
     if not db:
         return pd.DataFrame()
