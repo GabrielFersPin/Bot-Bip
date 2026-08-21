@@ -176,11 +176,12 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
     # Cabecera de Tabla
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_fill_color(226, 232, 240)
-    pdf.cell(28, 7, "Fecha", border=1, align="C", fill=True)
-    pdf.cell(22, 7, "Energia", border=1, align="C", fill=True)
-    pdf.cell(22, 7, "Animo", border=1, align="C", fill=True)
-    pdf.cell(22, 7, "Sueno", border=1, align="C", fill=True)
-    pdf.cell(96, 7, "Comentarios / Notas del Paciente", border=1, align="L", fill=True)
+    pdf.cell(26, 7, "Fecha", border=1, align="C", fill=True)
+    pdf.cell(18, 7, "Energia", border=1, align="C", fill=True)
+    pdf.cell(18, 7, "Animo", border=1, align="C", fill=True)
+    pdf.cell(18, 7, "Sueno", border=1, align="C", fill=True)
+    pdf.cell(24, 7, "Medicacion", border=1, align="C", fill=True)
+    pdf.cell(86, 7, "Comentarios / Notas", border=1, align="L", fill=True)
     pdf.ln(7)
 
     pdf.set_font("Helvetica", "", 8.5)
@@ -191,21 +192,34 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
         e_val = f"{row.get('energia', '-')}/10"
         h_val = f"{row.get('humor', '-')}/10"
         s_val = f"{row.get('sueno_horas', '-')}h"
-        com_val = str(row.get("comentarios", "")) if pd.notna(row.get("comentarios")) else ""
+        raw_com = str(row.get("comentarios", "")) if pd.notna(row.get("comentarios")) else ""
+
+        # Extraer medicación si está prefijada
+        med_val = "-"
+        com_val = raw_com
+        if "[Medicacion:" in raw_com:
+            try:
+                parts = raw_com.split("]", 1)
+                med_val = parts[0].replace("[Medicacion:", "").strip()
+                com_val = parts[1].strip() if len(parts) > 1 else ""
+            except Exception:
+                pass
+
         if com_val.lower() == "none" or not com_val:
             com_val = "-"
 
-        # Truncar comentarios si son muy largos
-        if len(com_val) > 65:
-            com_val = com_val[:62] + "..."
+        if len(com_val) > 55:
+            com_val = com_val[:52] + "..."
 
         com_val = com_val.encode('latin-1', 'replace').decode('latin-1')
+        med_val = med_val.encode('latin-1', 'replace').decode('latin-1')
 
-        pdf.cell(28, 6, f_val, border=1, align="C")
-        pdf.cell(22, 6, e_val, border=1, align="C")
-        pdf.cell(22, 6, h_val, border=1, align="C")
-        pdf.cell(22, 6, s_val, border=1, align="C")
-        pdf.cell(96, 6, com_val, border=1, align="L")
+        pdf.cell(26, 6, f_val, border=1, align="C")
+        pdf.cell(18, 6, e_val, border=1, align="C")
+        pdf.cell(18, 6, h_val, border=1, align="C")
+        pdf.cell(18, 6, s_val, border=1, align="C")
+        pdf.cell(24, 6, med_val, border=1, align="C")
+        pdf.cell(86, 6, com_val, border=1, align="L")
         pdf.ln(6)
 
     return bytes(pdf.output())

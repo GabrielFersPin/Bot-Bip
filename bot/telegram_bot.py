@@ -29,7 +29,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Estados de la conversación
-ENERGIA, HUMOR, SUENO, COMENTARIOS = range(4)
+ENERGIA, HUMOR, SUENO, MEDICACION, COMENTARIOS = range(5)
+
+def get_medicacion_keyboard() -> InlineKeyboardMarkup:
+    """Genera teclado para consultar adherencia a la medicación."""
+    keyboard = [
+        [InlineKeyboardButton("✅ Sí, tomada", callback_data="med_si"), InlineKeyboardButton("⚠️ Parcial", callback_data="med_parcial")],
+        [InlineKeyboardButton("❌ No tomada", callback_data="med_no"), InlineKeyboardButton("⏭️ Omitir / No aplica", callback_data="med_skip")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
 
 def get_sueno_keyboard() -> InlineKeyboardMarkup:
     """Genera un teclado en línea para seleccionar horas de sueño/descanso."""
@@ -183,8 +191,44 @@ async def sueno_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     context.user_data["sueno_horas"] = val
 
-    comment_text = (
+    med_text = (
         f"✅ Descanso guardado: **{val}h**\n\n"
+        "💊 **¿Has tomado tu medicación prescrita hoy?**"
+    )
+
+    if update.callback_query:
+        await update.callback_query.edit_message_text(
+            med_text,
+            parse_mode="Markdown",
+            reply_markup=get_medicacion_keyboard()
+        )
+    else:
+        await update.message.reply_text(
+            med_text,
+            parse_mode="Markdown",
+            reply_markup=get_medicacion_keyboard()
+        )
+
+    return MEDICACION
+
+
+async def medicacion_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Procesa la respuesta sobre la medicación y pasa al paso de comentarios."""
+    med_val = "Omitido"
+    if update.callback_query:
+        await update.callback_query.answer()
+        data = update.callback_query.data
+        if data == "med_si":
+            med_val = "Sí"
+        elif data == "med_parcial":
+            med_val = "Parcial"
+        elif data == "med_no":
+            med_val = "No"
+
+    context.user_data["medicacion"] = med_val
+
+    comment_text = (
+        f"✅ Medicación: **{med_val}**\n\n"
         "📝 **¿Quieres agregar algún comentario u observación sobre tu día?**\n"
         "(Escribe tus notas en un mensaje o presiona el botón para omitir):"
     )
@@ -220,6 +264,12 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     energia = context.user_data.get("energia", 5)
     humor = context.user_data.get("humor", 5)
     sueno_horas = context.user_data.get("sueno_horas", 8.0)
+    medicacion = context.user_data.get("medicacion", "Omitido")
+
+    # Concatenar estado de medicación en las notas si se ha respondido
+    comentario_final = comentario
+    if medicacion != "Omitido":
+        comentario_final = f"[Medicacion: {medicacion}] {comentario}".strip()
 
     # Guardar en Supabase
     result = db.guardar_registro_diario(
@@ -227,7 +277,7 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         energia=energia,
         humor=humor,
         sueno_horas=sueno_horas,
-        comentarios=comentario
+        comentarios=comentario_final
     )
 
     context.user_data.clear()
@@ -236,7 +286,7 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     alerta_text = ""
     if energia >= 9 and sueno_horas <= 4:
         alerta_text = (
-            "\n\n⚠️ **Aviso de Bienestar:** Notamos alta energía (9-10) con muy pocas horas de descanso (<4h). "
+            "\n\n⚠️ **Aviso de Bienestar:** Notamos alta energía (9-10) with muy pocas horas de descanso (<4h). "
             "Intenta tomar un espacio de relajación hoy con `/calma`."
         )
     elif energia <= 3 and humor <= 3:
@@ -258,6 +308,7 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             f"⚡ **Energía:** {energia}/10\n"
             f"🎭 **Humor:** {humor}/10\n"
             f"💤 **Descanso:** {sueno_horas}h\n"
+            f"💊 **Medicación:** {medicacion}\n"
             f"📝 **Notas:** {comentario if comentario else 'Sin comentarios'}"
             f"{alerta_text}"
         )
@@ -366,16 +417,51 @@ async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     )
 
 
+async def enviar_informe_pdf_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Comando /informe - Genera y envía directamente el PDF de Informe Clínico al chat."""
+    user_id = update.effective_user.id
+    msg = await update.message.reply_text("📄 **Generando tu Informe Clínico PDF...** Un momento por favor...", parse_mode="Markdown")
+
+    try:
+        df = db.fetch_user_data(user_id=user_id)
+        if df.empty:
+            await msg.edit_text("🌸 **Aviso:** No se encontraron registros de bienestar guardados aún. Inicia con `/registrar`.")
+            return
+
+        import importlib
+        import ai_insights.pdf_generator as pdf_gen_module
+        importlib.reload(pdf_gen_module)
+        
+        pdf_bytes = pdf_gen_module.generar_pdf_clinico(df)
+        
+        import io
+        pdf_file = io.BytesIO(pdf_bytes)
+        pdf_file.name = f"Informe_Clinico_Bienestar_{datetime.now().strftime('%Y_%m_%d')}.pdf"
+
+        await update.message.reply_document(
+            document=pdf_file,
+            filename=pdf_file.name,
+            caption="📄 **Aquí tienes tu Informe Clínico en PDF** listo para tu consulta médica o guardar en tus archivos.",
+            parse_mode="Markdown"
+        )
+        await msg.delete()
+    except Exception as err:
+        logger.error(f"Error al enviar PDF en /informe: {err}")
+        await msg.edit_text(f"⚠️ Ocurrió un inconveniente al generar el PDF: `{err}`", parse_mode="Markdown")
+
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /ayuda - Muestra los comandos disponibles."""
     help_text = (
         "🤖 **Bot-Bip - Comandos de Apoyo & Registro**\n\n"
-        "• `/registrar` - Iniciar el check-in diario (Energía, Ánimo y Descanso).\n"
+        "• `/registrar` - Check-in diario (Energía, Ánimo, Sueño y Medicación).\n"
+        "• `/informe` - Recibir tu **Informe Clínico PDF** directo en el chat.\n"
+        "• `/resumen_semanal` - Ver tu promedios de estabilidad de los últimos 7 días.\n"
+        "• `/dashboard` - Abrir tu panel de gráficos completos en el navegador.\n"
         "• `/calma` - Espacio de relajación y botones de llamada/mensaje a tu **Red de Apoyo**.\n"
         "• `/contacto` - Agregar personas de confianza (ej: `/contacto Gabriel +34600000000 Pareja`).\n"
         "• `/recordatorio` - Configurar la hora de tu notificación diaria.\n"
-        "• `/dashboard` - Abrir tu panel privado de estadísticas en Telegram.\n"
-        "• `/cancelar` - Cancelar el registro actual.\n"
+        "• `/cancelar` - Cancelar el registro en curso.\n"
         "• `/ayuda` - Ver este mensaje de ayuda."
     )
     await update.message.reply_text(help_text, parse_mode="Markdown")
@@ -465,6 +551,45 @@ async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
         parse_mode="Markdown",
         reply_markup=btn
     )
+
+
+async def resumen_semanal_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Comando /resumen_semanal - Muestra el digest motivacional de los últimos 7 días."""
+    user_id = update.effective_user.id
+    df = db.fetch_user_data(user_id=user_id)
+
+    if df.empty:
+        await update.message.reply_text("🌸 **Aviso:** No hay suficientes registros guardados esta semana. ¡Comienza hoy con `/registrar`!")
+        return
+
+    # Filtrar últimos 7 días
+    import pandas as pd
+    df['fecha'] = pd.to_datetime(df['fecha'])
+    hace_semana = pd.Timestamp.now() - pd.Timedelta(days=7)
+    df_7d = df[df['fecha'] >= hace_semana]
+
+    if df_7d.empty:
+        df_7d = df.tail(7)
+
+    total_registros = len(df_7d)
+    avg_energia = df_7d['energia'].mean()
+    avg_humor = df_7d['humor'].mean()
+    avg_sueno = df_7d['sueno_horas'].mean() if 'sueno_horas' in df_7d.columns else 8.0
+
+    msg_semanal = (
+        f"🌸 **Tu Digest Semanal de Bienestar** 📊\n\n"
+        f"🗓️ **Días registrados esta semana:** {total_registros}/7 días\n"
+        f"⚡ **Promedio Energía:** {avg_energia:.1f}/10\n"
+        f"🎭 **Promedio Ánimo:** {avg_humor:.1f}/10\n"
+        f"💤 **Promedio Descanso:** {avg_sueno:.1f}h/noche\n\n"
+        "✨ *¡Gran trabajo manteniendo la constancia de tus rutinas! Recuerda que puedes descargar tu informe en PDF con /informe.*"
+    )
+
+    url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
+    url_personalizada = f"{url_base}?user_id={user_id}"
+    btn = InlineKeyboardMarkup([[InlineKeyboardButton("📊 Ver Gráficos Completos", url=url_personalizada)]])
+
+    await update.message.reply_text(msg_semanal, parse_mode="Markdown", reply_markup=btn)
 
 
 async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -605,6 +730,10 @@ def main():
                 CallbackQueryHandler(sueno_step, pattern="^sueno_"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, sueno_step)
             ],
+            MEDICACION: [
+                CallbackQueryHandler(medicacion_step, pattern="^med_"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, medicacion_step)
+            ],
             COMENTARIOS: [
                 CallbackQueryHandler(comentarios_step, pattern="^skip_comments$"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, comentarios_step)
@@ -616,11 +745,13 @@ def main():
     app.add_handler(conv_handler)
     app.add_handler(CallbackQueryHandler(horario_callback_handler, pattern="^set_hora_"))
     app.add_handler(CommandHandler("dashboard", dashboard_command))
+    app.add_handler(CommandHandler("informe", enviar_informe_pdf_command))
     app.add_handler(CommandHandler("calma", calma_command))
     app.add_handler(CommandHandler("contacto", agregar_contacto_command))
     app.add_handler(CommandHandler("ayuda", help_command))
     app.add_handler(CommandHandler("recordatorio", set_recordatorio_command))
     app.add_handler(CommandHandler("recordatorio_off", remove_recordatorio_command))
+    app.add_handler(CommandHandler("resumen_semanal", resumen_semanal_command))
     app.add_handler(CommandHandler("test_recordatorio", test_recordatorio_command))
 
     logger.info("Bot-Bip iniciando en modo Polling...")
