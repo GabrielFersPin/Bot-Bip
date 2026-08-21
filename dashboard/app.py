@@ -374,20 +374,7 @@ st.dataframe(
     }
 )
 
-col_csv, col_pdf = st.columns(2)
-
-with col_csv:
-    csv_data = filtered_df.to_csv(index=False).encode('utf-8-sig')
-    st.download_button(
-        label="📊 Descargar Datos (.csv)",
-        data=csv_data,
-        file_name=f"historico_bienestar_{today.strftime('%Y_%m_%d')}.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
-
-with col_pdf:
-    ver_informe = st.button("📄 Generar Vista de Informe Clínico", use_container_width=True)
+ver_informe = st.button("📄 Generar Vista de Informe Clínico (Para Consulta)", use_container_width=True)
 
 if "ver_informe" in locals() and ver_informe:
     st.markdown("---")
