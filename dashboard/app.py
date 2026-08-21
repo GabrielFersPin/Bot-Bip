@@ -298,14 +298,34 @@ fig.update_layout(
     margin=dict(l=10, r=10, t=10, b=10),
     height=330,
     hovermode="x unified",
-    xaxis=dict(title=None, showgrid=True, gridcolor="#334155"),
-    yaxis=dict(title=None, range=[0, 11], showgrid=True, gridcolor="#334155"),
+    xaxis=dict(
+        title=None, 
+        showgrid=True, 
+        gridcolor="#334155",
+        fixedrange=True  # Bloquea el zoom/escala en el eje X
+    ),
+    yaxis=dict(
+        title=None, 
+        range=[0, 11], 
+        showgrid=True, 
+        gridcolor="#334155",
+        fixedrange=True  # Bloquea el zoom/escala en el eje Y
+    ),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title=None)
 )
 
-fig.update_traces(line=dict(width=3), marker=dict(size=9))
+fig.update_traces(line=dict(width=3), marker=dict(size=10))
 
-st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+# Desactivar interacción de zoom en la configuración del gráfico
+st.plotly_chart(
+    fig, 
+    use_container_width=True, 
+    config={
+        "displayModeBar": False, 
+        "scrollZoom": False,
+        "staticPlot": False
+    }
+)
 
 # ==============================================================================
 # TABLA DE DATOS HISTÓRICOS Y EXPORTACIÓN
