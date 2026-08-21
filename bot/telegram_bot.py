@@ -537,12 +537,19 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
 
 
 async def remove_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Desactiva el recordatorio diario."""
-    chat_id = update.effective_chat.id
-    current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
-    for job in current_jobs:
-        job.schedule_removal()
     await update.message.reply_text("🔕 Recordatorio diario desactivado.")
+
+
+async def test_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Envía un recordatorio de prueba programado en 5 segundos."""
+    chat_id = update.effective_chat.id
+    context.job_queue.run_once(
+        enviar_recordatorio_job,
+        when=5,
+        chat_id=chat_id,
+        name=f"test_{chat_id}"
+    )
+    await update.message.reply_text("⏱️ **Recordatorio de prueba programado.** Te llegará un mensaje en 5 segundos...", parse_mode="Markdown")
 
 
 # ==============================================================================
@@ -597,6 +604,7 @@ def main():
     app.add_handler(CommandHandler("ayuda", help_command))
     app.add_handler(CommandHandler("recordatorio", set_recordatorio_command))
     app.add_handler(CommandHandler("recordatorio_off", remove_recordatorio_command))
+    app.add_handler(CommandHandler("test_recordatorio", test_recordatorio_command))
 
     logger.info("Bot-Bip iniciando en modo Polling...")
     app.run_polling()
