@@ -423,10 +423,13 @@ async def enviar_informe_pdf_command(update: Update, context: ContextTypes.DEFAU
     msg = await update.message.reply_text("📄 **Generando tu Informe Clínico PDF...** Un momento por favor...", parse_mode="Markdown")
 
     try:
-        df = db.fetch_user_data(user_id=user_id)
-        if df.empty:
+        import pandas as pd
+        registros = db.obtener_registros(user_id=user_id)
+        if not registros:
             await msg.edit_text("🌸 **Aviso:** No se encontraron registros de bienestar guardados aún. Inicia con `/registrar`.")
             return
+
+        df = pd.DataFrame(registros)
 
         import importlib
         import ai_insights.pdf_generator as pdf_gen_module
@@ -556,11 +559,14 @@ async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
 async def resumen_semanal_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /resumen_semanal - Muestra el digest motivacional de los últimos 7 días."""
     user_id = update.effective_user.id
-    df = db.fetch_user_data(user_id=user_id)
+    import pandas as pd
+    registros = db.obtener_registros(user_id=user_id)
 
-    if df.empty:
+    if not registros:
         await update.message.reply_text("🌸 **Aviso:** No hay suficientes registros guardados esta semana. ¡Comienza hoy con `/registrar`!")
         return
+
+    df = pd.DataFrame(registros)
 
     # Filtrar últimos 7 días
     import pandas as pd
