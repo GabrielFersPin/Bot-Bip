@@ -290,24 +290,18 @@ def get_skip_keyboard() -> InlineKeyboardMarkup:
 # ==============================================================================
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Comando /start - Da la bienvenida personalizada e inicia el registro diario."""
+    """Comando /start - Bienvenida concisa e inicio inmediato de registro."""
     user = update.effective_user
     welcome_text = (
-        f"✨ **¡Hola, {user.first_name}! Te doy la bienvenida a Bot-Bip** 💖\n\n"
-        "Soy tu compañero personal para el seguimiento de tu **estabilidad psicoafectiva y bienestar**.\n\n"
-        "Cada día realizaremos **3 preguntas rápidas** en 10 segundos:\n"
-        "⚡ **1. Nivel de Energía** (1-10)\n"
-        "🎭 **2. Estado de Ánimo / Humor** (1-10)\n"
-        "💤 **3. Horas de Descanso** (Marcador biológico de estabilidad)\n"
-        "📝 *(Opcional)* Notas sobre tu día\n\n"
-        "🛡️ **Herramientas de Apoyo Disponibles:**\n"
-        "• `/calma` - Ejercicios de respiración, anclaje y acceso a tu **Red de Apoyo** (llamadas y mensajes de ayuda).\n"
-        "• `/contacto` - Agregar personas de confianza a tu red de auxilio.\n"
-        "• `/recordatorio` - Configurar tu notificación diaria a la hora que prefieras.\n"
-        "• `/dashboard` - Ver tu panel gráfico y reportes inteligentes de la IA de forma 100% privada.\n\n"
-        "--- \n"
-        "⚡ **Comencemos con hoy: ¿Cómo está tu nivel de ENERGÍA?**\n"
-        "*(1 = Exhausto/a | 10 = Máxima energía)*"
+        f"✨ **¡Hola, {user.first_name}! Bienvenido/a a Bot-Bip** 💖\n\n"
+        "Tu espacio seguro para registrar tu **estabilidad y descanso**.\n\n"
+        "🛡️ **Comandos clave:**\n"
+        "• `/calma` - Ejercicios & Red de Apoyo (llamadas/mensajes)\n"
+        "• `/contacto` - Añadir personas de confianza\n"
+        "• `/recordatorio` - Configurar la hora de tu aviso diario\n"
+        "• `/dashboard` - Panel de gráficos e informes privados\n\n"
+        "⚡ **¿Cómo está tu nivel de ENERGÍA hoy?** (1 al 10):\n"
+        "*(1 = Exhausto/a | 10 = Imparable)*"
     )
     await update.message.reply_text(
         welcome_text,
@@ -655,7 +649,8 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("start", start_command),
-            CommandHandler("registrar", registrar_command)
+            CommandHandler("registrar", registrar_command),
+            CallbackQueryHandler(registrar_command, pattern="^iniciar_registro_ahora$")
         ],
         states={
             ENERGIA: [
