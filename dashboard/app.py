@@ -261,40 +261,15 @@ st.markdown("---")
 
 st.subheader("📊 Tu Evolución de Bienestar")
 
-# Gráfico principal estilizado en Plotly
-fig = go.Figure()
+# Gráfico limpio de fluctuaciones usando st.line_chart nativo de Streamlit (sin zoom táctil ni desbordamientos)
+chart_df = df.set_index("fecha")[["energia", "humor"]].copy()
+chart_df.columns = ["⚡ Energía", "💖 Ánimo"]
 
-# Línea de Energía
-fig.add_trace(go.Scatter(
-    x=df["fecha"], y=df["energia_rolling"],
-    mode="lines+markers",
-    name="⚡ Energía",
-    line=dict(color="#38bdf8", width=4, shape="spline"),
-    marker=dict(size=8, color="#0284c7")
-))
-
-# Línea de Humor
-fig.add_trace(go.Scatter(
-    x=df["fecha"], y=df["humor_rolling"],
-    mode="lines+markers",
-    name="💖 Estado de Ánimo",
-    line=dict(color="#f43f5e", width=4, shape="spline"),
-    marker=dict(size=8, color="#be123c")
-))
-
-fig.update_layout(
-    template="plotly_dark",
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(15,23,42,0.6)",
-    height=520,  # Aumentado de 400px a 520px para mejor visualización en pantallas verticales móviles
-    margin=dict(l=10, r=10, t=40, b=10),
-    font=dict(size=14),
-    yaxis=dict(range=[0.5, 10.5], title="Escala (1-10)", dtick=1),
-    xaxis=dict(title="Fecha", showgrid=True),
-    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5)
+st.line_chart(
+    chart_df,
+    height=320,
+    use_container_width=True
 )
-
-st.plotly_chart(fig, use_container_width=True)
 
 # ==============================================================================
 # TABLA DE DATOS HISTÓRICOS Y EXPORTACIÓN
