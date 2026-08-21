@@ -374,15 +374,31 @@ st.dataframe(
     }
 )
 
-# Botón para descargar CSV optimizado para móviles y Excel (UTF-8 con BOM)
-csv_data = filtered_df.to_csv(index=False).encode('utf-8-sig')
-st.download_button(
-    label="📥 Descargar Mi Histórico (.csv)",
-    data=csv_data,
-    file_name=f"historico_bienestar_{today.strftime('%Y_%m_%d')}.csv",
-    mime="text/csv",
-    use_container_width=True
-)
+col_csv, col_pdf = st.columns(2)
+
+with col_csv:
+    csv_data = filtered_df.to_csv(index=False).encode('utf-8-sig')
+    st.download_button(
+        label="📊 Descargar Datos (.csv)",
+        data=csv_data,
+        file_name=f"historico_bienestar_{today.strftime('%Y_%m_%d')}.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
+with col_pdf:
+    try:
+        from ai_insights.pdf_generator import generar_pdf_clinico
+        pdf_bytes = generar_pdf_clinico(filtered_df)
+        st.download_button(
+            label="📄 Descargar Informe Clínico (PDF)",
+            data=pdf_bytes,
+            file_name=f"informe_medico_bienestar_{today.strftime('%Y_%m_%d')}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+    except Exception as pdf_err:
+        st.warning(f"Opción de PDF disponible tras instalar dependencias ({pdf_err})")
 
 # ==============================================================================
 # INTEGRACIÓN DEL AI INSIGHTS AGENT (LLM REASONING)
