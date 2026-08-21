@@ -462,36 +462,83 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 # AGENTE DE RECORDATORIOS (JobQueue)
 # ==============================================================================
 
+def get_horarios_keyboard() -> InlineKeyboardMarkup:
+    """Genera botones interactivos con opciones comunes de horario diario."""
+    keyboard = [
+        [InlineKeyboardButton("🌅 Mañana (09:00)", callback_data="set_hora_09:00"), InlineKeyboardButton("☀️ Tarde (14:00)", callback_data="set_hora_14:00")],
+        [InlineKeyboardButton("🌆 Noche (20:00)", callback_data="set_hora_20:00"), InlineKeyboardButton("🌙 Antes de dormir (22:00)", callback_data="set_hora_22:00")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
 async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Tarea programada que envía el recordatorio de registro diario."""
+    """Tarea programada que envía el recordatorio de registro diario con botón de inicio rápido."""
     job = context.job
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    btn = InlineKeyboardMarkup([[InlineKeyboardButton("📝 Realizar Registro Ahora", callback_data="iniciar_registro_ahora")]])
     await context.bot.send_message(
         chat_id=job.chat_id,
-        text="🔔 **¡Hola! Hora de registrar tu día.**\n\nUsa /registrar para responder tus preguntas de energía y humor.",
-        parse_mode="Markdown"
+        text="🔔 **¡Hola! Es momento de tu check-in diario de bienestar.**\n\nPresiona el botón de abajo o envía /registrar para responder tus 3 preguntas rápidas.",
+        parse_mode="Markdown",
+        reply_markup=btn
     )
 
 
 async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Configura una tarea programada diaria usando JobQueue."""
+    """Permite elegir interactivamente la hora del recordatorio o enviarla por texto."""
     chat_id = update.effective_chat.id
-    if not context.args:
-        await update.message.reply_text(
-            "⚠️ Por favor indica la hora en formato HH:MM (24h). Ej: `/recordatorio 20:30`",
-            parse_mode="Markdown"
-        )
-        return
 
-    try:
-        hora_str = context.args[0]
+    # Si pasa un argumento directamente (ej: /recordatorio 21:30)
+    if context.args:
+        try:
+            hora_str = context.args[0]
+            time_obj = datetime.strptime(hora_str, "%H:%M").time()
+
+            current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
+            for job in current_jobs:
+                job.schedule_removal()
+
+            context.job_queue.run_daily(
+                enviar_recordatorio_job,
+                time=time_obj,
+                chat_id=chat_id,
+                name=str(chat_id)
+            )
+
+            await update.message.reply_text(
+                f"⏰ **Recordatorio programado diariamente a las {hora_str}hs.**",
+                parse_mode="Markdown"
+            )
+            return
+        except ValueError:
+            pass
+
+    # Si no especifica hora, ofrecer botones para elegir fácilmente
+    await update.message.reply_text(
+        "⏰ **Configuración de Recordatorio Diario**\n\n"
+        "Elige la hora que mejor se adapte a tu rutina para recibir tu notificación diaria automática:\n"
+        "*(O escribe `/recordatorio HH:MM` con tu hora personalizada)*",
+        parse_mode="Markdown",
+        reply_markup=get_horarios_keyboard()
+    )
+
+
+async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Maneja el clic en los botones de selección de horario."""
+    query = update.callback_query
+    await query.answer()
+
+    if query.data.startswith("set_hora_"):
+        hora_str = query.data.replace("set_hora_", "")
+        chat_id = update.effective_chat.id
         time_obj = datetime.strptime(hora_str, "%H:%M").time()
 
-        # Eliminar jobs previos del mismo chat
+        # Eliminar jobs previos
         current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
         for job in current_jobs:
             job.schedule_removal()
 
-        # Programar job diario
+        # Programar nuevo recordatorio diario
         context.job_queue.run_daily(
             enviar_recordatorio_job,
             time=time_obj,
@@ -499,12 +546,20 @@ async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT
             name=str(chat_id)
         )
 
-        await update.message.reply_text(
-            f"⏰ **Recordatorio programado diariamente a las {hora_str}hs.**",
+        await query.edit_message_text(
+            f"✅ **¡Excelente! Recordatorio configurado.**\n\n"
+            f"Te enviaré una notificación diaria automática a las **{hora_str}hs** para realizar tu check-in.\n"
+            f"*(Puedes cambiar la hora cuando quieras con /recordatorio)*",
             parse_mode="Markdown"
         )
-    except ValueError:
-        await update.message.reply_text("❌ Formato de hora inválido. Usa HH:MM en 24 horas (ej: 21:00).")
+    elif query.data == "iniciar_registro_ahora":
+        await query.message.reply_text(
+            "⚡ **Registro Diario**\n\n"
+            "**¿Cómo está tu nivel de ENERGÍA hoy?** (1 al 10):\n"
+            "1 = Exhausto | 10 = Plena energía",
+            parse_mode="Markdown",
+            reply_markup=get_rating_keyboard("energia")
+        )
 
 
 async def remove_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -557,6 +612,7 @@ def main():
     )
 
     app.add_handler(conv_handler)
+    app.add_handler(CallbackQueryHandler(horario_callback_handler, pattern="^(set_hora_|iniciar_registro_ahora)"))
     app.add_handler(CommandHandler("dashboard", dashboard_command))
     app.add_handler(CommandHandler("calma", calma_command))
     app.add_handler(CommandHandler("ayuda", help_command))
