@@ -114,7 +114,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Detección de Telegram WebApp user_id vía parámetros de URL (st.query_params)
+# Detección estricta de Telegram WebApp user_id vía parámetros de URL (st.query_params)
 query_params = st.query_params
 telegram_user_id = query_params.get("user_id", None)
 
@@ -122,20 +122,14 @@ user_filter = None
 
 if telegram_user_id and str(telegram_user_id).isdigit():
     user_filter = int(telegram_user_id)
-    st.sidebar.success(f"🔒 **Panel Privado** (ID Usuario: {user_filter})")
+    st.sidebar.success(f"🔒 **Panel Privado de Usuario**\n\nID: `{user_filter}`")
 else:
-    st.sidebar.header("🔍 Filtros & Configuración")
-    # Cargar lista de usuarios si no viene de una WebApp privada de Telegram
-    if db:
-        usuarios_disponibles = db.obtener_usuarios_unicos()
-    else:
-        usuarios_disponibles = []
-
-    if usuarios_disponibles:
-        user_options = ["Todos los usuarios"] + [str(u) for u in usuarios_disponibles]
-        selected_user_str = st.sidebar.selectbox("Seleccionar Usuario (ID):", user_options)
-        if selected_user_str != "Todos los usuarios":
-            user_filter = int(selected_user_str)
+    # Si se accede directamente sin user_id desde Telegram, bloquemos la vista global por seguridad
+    st.warning("🔒 **Acceso Privado Protegido**")
+    st.info(
+        "Para ver tus estadísticas personales de forma segura, por favor abre el Dashboard directamente desde tu conversación en Telegram usando el comando `/dashboard` o la Web App del menú."
+    )
+    st.stop()
 
 # Filtro de rango de fechas
 today = datetime.now().date()
