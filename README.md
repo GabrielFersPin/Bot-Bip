@@ -26,7 +26,7 @@ Si este bot te ha resultado útil o quieres ayudar a mantener el servidor de des
 2. Informes Clínicos PDF Directos (/informe): Generación automática de reportes en PDF vectorial listos para presentar en la consulta de psiquiatría o psicología.
 3. Resumen Semanal Motivacional (/resumen_semanal): Cálculo de tendencias y promedios de los últimos 7 días.
 4. Red de Apoyo y Notificación de Acompañamiento: Si la persona no realiza registros en 3 días (debido a un bajón o cansancio), el bot notifica compasivamente a sus personas de confianza registradas (/contacto).
-5. Panel Web Interactivo (Streamlit): Gráficos de tendencias, correlaciones y diagnósticos mediante IA (Google Gemini / Groq).
+5. Panel Web Interactivo (Streamlit): Gráficos de tendencias, correlaciones y diagnósticos mediante IA.
 
 ---
 
