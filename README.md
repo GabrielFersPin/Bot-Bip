@@ -15,8 +15,8 @@ Este proyecto es 100% de código abierto, gratuito e impulsado por la comunidad.
 
 Si este bot te ha resultado útil o quieres ayudar a mantener el servidor de despliegue 24/7 y la infraestructura en la nube encendidos, puedes apoyar con una donación voluntaria:
 
-- [Buy Me A Coffee](https://www.buymeacoffee.com/gabrielferspin)
-- [GitHub Sponsors](https://github.com/sponsors/GabrielFersPin)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-Donate-orange?style=for-the-badge&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/gabrielferspin)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor_on_GitHub-Donate-ea4aaa?style=for-the-badge&logo=github)](https://github.com/sponsors/GabrielFersPin)
 
 ---
 
