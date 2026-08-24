@@ -1,7 +1,11 @@
 import os
+import sys
 import logging
 from datetime import datetime, time
 from typing import Dict, Any
+
+# Asegurar que la raíz del proyecto esté en el PYTHONPATH
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from dotenv import load_dotenv
 from telegram import (
