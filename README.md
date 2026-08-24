@@ -15,8 +15,8 @@ Este proyecto es 100% de código abierto, gratuito e impulsado por la comunidad.
 
 Si este bot te ha resultado útil o quieres ayudar a mantener el servidor de despliegue 24/7 y la infraestructura en la nube encendidos, puedes apoyar con una donación voluntaria:
 
-- [Buy Me A Coffee](https://www.buymeacoffee.com/)
-- [GitHub Sponsors](https://github.com/sponsors)
+- [Buy Me A Coffee](https://www.buymeacoffee.com/gabrielferspin)
+- [GitHub Sponsors](https://github.com/sponsors/GabrielFersPin)
 
 ---
 
