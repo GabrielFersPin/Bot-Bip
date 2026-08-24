@@ -549,16 +549,47 @@ def get_horarios_keyboard() -> InlineKeyboardMarkup:
 
 
 async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Tarea programada que envía el recordatorio de registro diario con botón de inicio rápido."""
+    """Tarea programada que envía el recordatorio diario y comprueba inactividad de 3 días para alertar compasivamente a la red de apoyo."""
     job = context.job
+    chat_id = job.chat_id
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
     btn = InlineKeyboardMarkup([[InlineKeyboardButton("📝 Realizar Registro Ahora", callback_data="iniciar_registro_ahora")]])
     await context.bot.send_message(
-        chat_id=job.chat_id,
-        text="🔔 **¡Hola! Es momento de tu check-in diario de bienestar.**\n\nPresiona el botón de abajo o envía /registrar para responder tus 3 preguntas rápidas.",
+        chat_id=chat_id,
+        text="🔔 **¡Hola! Es momento de tu check-in diario de bienestar.**\n\nPresiona el botón de abajo o envía /registrar para responder tus preguntas rápidas.",
         parse_mode="Markdown",
         reply_markup=btn
     )
+
+    # Comprobar inactividad de 3 días consecutivos
+    try:
+        import pandas as pd
+        registros = db.obtener_registros(user_id=chat_id)
+        if registros:
+            df = pd.DataFrame(registros)
+            if "fecha" in df.columns:
+                df["fecha_dt"] = pd.to_datetime(df["fecha"])
+                ultima_fecha = df["fecha_dt"].max()
+                dias_inactivo = (pd.Timestamp.now().normalize() - ultima_fecha.normalize()).days
+
+                if dias_inactivo >= 3:
+                    contactos = db.obtener_contactos_emergencia(chat_id)
+                    if contactos:
+                        user_name = job.data.get("first_name", "tu ser querido") if isinstance(job.data, dict) else "tu ser querido"
+                        msg_apoyo = (
+                            f"💙 **Notificación de Acompañamiento y Rescate:**\n\n"
+                            f"Hola, notamos que han pasado {dias_inactivo} días sin registros de bienestar de {user_name}.\n"
+                            "En momentos de cansancio o bajón, es totalmente normal hacer una pausa. "
+                            "Podría ser un buen momento para enviarle un mensaje cariñoso, una llamada o un abrazo sin presiones. 🌸"
+                        )
+                        await context.bot.send_message(
+                            chat_id=chat_id,
+                            text=msg_apoyo,
+                            parse_mode="Markdown"
+                        )
+    except Exception as err:
+        logger.error(f"Error al verificar inactividad de 3 días: {err}")
 
 
 async def resumen_semanal_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
