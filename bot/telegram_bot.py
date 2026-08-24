@@ -422,6 +422,34 @@ async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     )
 
 
+async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Comando /stats - Muestra métricas globales del bot únicamente al Administrador."""
+    user_id = update.effective_user.id
+    admin_id_str = os.getenv("ADMIN_USER_ID", "")
+
+    # Si está configurado ADMIN_USER_ID, restringir acceso exclusivo al administrador
+    if admin_id_str and str(user_id) != admin_id_str.strip():
+        await update.message.reply_text("🔒 Este comando es privado y está reservado para la administración del sistema.")
+        return
+
+    try:
+        usuarios = db.obtener_usuarios_unicos()
+        registros = db.obtener_registros()
+        total_usuarios = len(usuarios)
+        total_registros = len(registros)
+
+        msg = (
+            f"📊 **Métricas de Uso de Bot-Bip (Administración)**\n\n"
+            f"👥 **Usuarios Totales:** {total_usuarios}\n"
+            f"📝 **Registros Diarios Totales:** {total_registros}\n\n"
+            f"✨ *Métricas globales del sistema.*"
+        )
+        await update.message.reply_text(msg, parse_mode="Markdown")
+    except Exception as err:
+        logger.error(f"Error al obtener métricas: {err}")
+        await update.message.reply_text("⚠️ No se pudieron obtener las estadísticas en este momento.")
+
+
 async def enviar_informe_pdf_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /informe - Genera y envía directamente el PDF de Informe Clínico al chat."""
     user_id = update.effective_user.id
@@ -809,6 +837,7 @@ def main():
     app.add_handler(CommandHandler("recordatorio", set_recordatorio_command))
     app.add_handler(CommandHandler("recordatorio_off", remove_recordatorio_command))
     app.add_handler(CommandHandler("resumen_semanal", resumen_semanal_command))
+    app.add_handler(CommandHandler("stats", stats_command))
     app.add_handler(CommandHandler("test_recordatorio", test_recordatorio_command))
 
     logger.info("Bot-Bip iniciando en modo Polling...")
