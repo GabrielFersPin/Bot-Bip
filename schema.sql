@@ -29,12 +29,16 @@ CREATE INDEX IF NOT EXISTS idx_registros_user_fecha ON public.registros_diarios(
 
 -- 4. Trigger para actualizar el campo updated_at automáticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 DROP TRIGGER IF EXISTS set_updated_at ON public.registros_diarios;
 CREATE TRIGGER set_updated_at
@@ -50,26 +54,26 @@ EXECUTE FUNCTION update_updated_at_column();
 ALTER TABLE public.registros_diarios ENABLE ROW LEVEL SECURITY;
 
 -- Política 1: Lectura para clientes con Anon Key o Authenticated
--- Permite consultar datos de la base de datos (por ejemplo, desde el Dashboard de Streamlit)
 CREATE POLICY "Permitir lectura publica o anonima"
 ON public.registros_diarios
 FOR SELECT
 TO anon, authenticated
 USING (true);
 
--- Política 2: Inserción y Modificación (Insert/Update)
--- Permite insertar registros tanto con Anon Key como con Service Role
+-- Política 2: Inserción validando que el user_id no sea nulo
 CREATE POLICY "Permitir insercion a rol anon y authenticated"
 ON public.registros_diarios
 FOR INSERT
 TO anon, authenticated
-WITH CHECK (true);
+WITH CHECK (user_id IS NOT NULL);
 
+-- Política 3: Actualización validando la presencia de user_id
 CREATE POLICY "Permitir actualizacion a rol anon y authenticated"
 ON public.registros_diarios
 FOR UPDATE
 TO anon, authenticated
-USING (true);
+USING (user_id IS NOT NULL)
+WITH CHECK (user_id IS NOT NULL);
 
 -- ==============================================================================
 -- Tabla: contactos_emergencia (Red de Apoyo)
@@ -84,4 +88,15 @@ CREATE TABLE IF NOT EXISTS public.contactos_emergencia (
 );
 
 ALTER TABLE public.contactos_emergencia ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Permitir acceso a contactos" ON public.contactos_emergencia FOR ALL TO anon, authenticated USING (true);
+
+CREATE POLICY "Permitir insercion de contactos"
+ON public.contactos_emergencia
+FOR INSERT
+TO anon, authenticated
+WITH CHECK (user_id IS NOT NULL AND nombre IS NOT NULL);
+
+CREATE POLICY "Permitir lectura de contactos"
+ON public.contactos_emergencia
+FOR SELECT
+TO anon, authenticated
+USING (true);
