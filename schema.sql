@@ -27,11 +27,11 @@ CREATE INDEX IF NOT EXISTS idx_registros_user_id ON public.registros_diarios(use
 CREATE INDEX IF NOT EXISTS idx_registros_fecha ON public.registros_diarios(fecha);
 CREATE INDEX IF NOT EXISTS idx_registros_user_fecha ON public.registros_diarios(user_id, fecha);
 
--- 4. Trigger para actualizar el campo updated_at automáticamente
+-- 4. Trigger para actualizar el campo updated_at automáticamente (con search_path seguro)
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public
 AS $$
 BEGIN
@@ -39,6 +39,9 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+
+-- Revocar permisos de ejecución directa vía API REST pública
+REVOKE EXECUTE ON FUNCTION public.update_updated_at_column() FROM PUBLIC, anon, authenticated;
 
 DROP TRIGGER IF EXISTS set_updated_at ON public.registros_diarios;
 CREATE TRIGGER set_updated_at
