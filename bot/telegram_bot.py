@@ -795,26 +795,26 @@ COMMANDS_BY_LANG = {
         BotCommand("ayuda", "❓ Ver guía de ayuda y comandos")
     ],
     "en": [
-        BotCommand("registrar", "⚡ Start daily wellness check-in"),
-        BotCommand("informe", "📄 Download Clinical PDF Report"),
-        BotCommand("resumen_semanal", "🌸 View weekly averages"),
+        BotCommand("log", "⚡ Start daily wellness check-in"),
+        BotCommand("report", "📄 Download Clinical PDF Report"),
+        BotCommand("weekly_summary", "🌸 View weekly averages"),
         BotCommand("dashboard", "📊 Open Dashboard with full charts"),
-        BotCommand("calma", "💙 Relaxation space & Support Network"),
-        BotCommand("contacto", "🤝 Add trusted contact"),
-        BotCommand("recordatorio", "⏰ Set daily notification time"),
-        BotCommand("idioma", "🌐 Change language / Idioma"),
-        BotCommand("ayuda", "❓ View help guide and commands")
+        BotCommand("calm", "💙 Relaxation space & Support Network"),
+        BotCommand("contact", "🤝 Add trusted contact"),
+        BotCommand("reminder", "⏰ Set daily notification time"),
+        BotCommand("language", "🌐 Change language / Idioma"),
+        BotCommand("help", "❓ View help guide and commands")
     ],
     "fr": [
-        BotCommand("registrar", "⚡ Commencer le suivi quotidien de bien-être"),
-        BotCommand("informe", "📄 Télécharger el rapport clinique PDF"),
-        BotCommand("resumen_semanal", "🌸 Voir les moyennes de la semaine"),
+        BotCommand("enregistrer", "⚡ Commencer le suivi quotidien de bien-être"),
+        BotCommand("rapport", "📄 Télécharger le rapport clinique PDF"),
+        BotCommand("resume_hebdo", "🌸 Voir les moyennes de la semaine"),
         BotCommand("dashboard", "📊 Ouvrir le tableau de bord avec graphiques"),
-        BotCommand("calma", "💙 Espace relaxation & Réseau de soutien"),
-        BotCommand("contacto", "🤝 Ajouter un contact de confiance"),
-        BotCommand("recordatorio", "⏰ Configurer l'heure de notification"),
-        BotCommand("idioma", "🌐 Changer de langue / Language"),
-        BotCommand("ayuda", "❓ Voir el guide d'aide et les commandes")
+        BotCommand("calme", "💙 Espace relaxation & Réseau de soutien"),
+        BotCommand("contact", "🤝 Ajouter un contact de confiance"),
+        BotCommand("rappel", "⏰ Configurer l'heure de notification"),
+        BotCommand("langue", "🌐 Changer de langue / Language"),
+        BotCommand("aide", "❓ Voir le guide d'aide et les commandes")
     ]
 }
 
@@ -836,11 +836,11 @@ def main():
 
     app = ApplicationBuilder().token(token).post_init(setup_bot_commands).build()
 
-    # Configuración del ConversationHandler
+    # Configuración del ConversationHandler con comandos traducidos (ES / EN / FR)
     conv_handler = ConversationHandler(
         entry_points=[
-            CommandHandler("start", start_command),
-            CommandHandler("registrar", registrar_command),
+            CommandHandler(["start", "inicio"], start_command),
+            CommandHandler(["registrar", "log", "enregistrer"], registrar_command),
             CallbackQueryHandler(registrar_command, pattern="^iniciar_registro_ahora$")
         ],
         per_chat=True,
@@ -868,25 +868,23 @@ def main():
                 MessageHandler(filters.TEXT & ~filters.COMMAND, comentarios_step)
             ]
         },
-        fallbacks=[CommandHandler("cancelar", cancel_command)]
+        fallbacks=[CommandHandler(["cancelar", "cancel", "annuler"], cancel_command)]
     )
 
     app.add_handler(conv_handler)
     app.add_handler(CallbackQueryHandler(horario_callback_handler, pattern="^set_hora_"))
-    app.add_handler(CommandHandler("dashboard", dashboard_command))
-    app.add_handler(CommandHandler("informe", enviar_informe_pdf_command))
-    app.add_handler(CommandHandler("calma", calma_command))
-    app.add_handler(CommandHandler("contacto", agregar_contacto_command))
-    app.add_handler(CommandHandler("ayuda", help_command))
-    app.add_handler(CommandHandler("recordatorio", set_recordatorio_command))
+    app.add_handler(CommandHandler(["dashboard", "tableaudebord"], dashboard_command))
+    app.add_handler(CommandHandler(["informe", "report", "rapport"], enviar_informe_pdf_command))
+    app.add_handler(CommandHandler(["calma", "calm", "calme"], calma_command))
+    app.add_handler(CommandHandler(["contacto", "contact"], agregar_contacto_command))
+    app.add_handler(CommandHandler(["ayuda", "help", "aide"], help_command))
+    app.add_handler(CommandHandler(["recordatorio", "reminder", "rappel"], set_recordatorio_command))
     app.add_handler(CommandHandler("recordatorio_off", remove_recordatorio_command))
-    app.add_handler(CommandHandler("resumen_semanal", resumen_semanal_command))
+    app.add_handler(CommandHandler(["resumen_semanal", "weekly_summary", "resume_hebdo"], resumen_semanal_command))
     app.add_handler(CommandHandler("stats", stats_command))
     app.add_handler(CommandHandler("test_recordatorio", test_recordatorio_command))
-    app.add_handler(CommandHandler("idioma", idioma_command))
-    app.add_handler(CommandHandler("language", idioma_command))
+    app.add_handler(CommandHandler(["idioma", "language", "langue"], idioma_command))
     app.add_handler(CallbackQueryHandler(idioma_callback_handler, pattern="^set_lang_"))
-    app.add_handler(CommandHandler("help", help_command))
 
     logger.info("Bot-Bip iniciando en modo Polling...")
     app.run_polling()
