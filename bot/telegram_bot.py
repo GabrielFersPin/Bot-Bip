@@ -26,6 +26,7 @@ from telegram.ext import (
 )
 
 from db.supabase_client import get_db_client
+from i18n import t, resolve_lang_code
 
 # Configuración de Logging
 logging.basicConfig(
@@ -36,11 +37,19 @@ logger = logging.getLogger(__name__)
 # Estados de la conversación
 ENERGIA, HUMOR, SUENO, MEDICACION, COMENTARIOS = range(5)
 
-def get_medicacion_keyboard() -> InlineKeyboardMarkup:
-    """Genera teclado para consultar adherencia a la medicación."""
+def get_user_language(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Obtiene el idioma preferido del usuario (desde context.user_data o update.effective_user)."""
+    if context and context.user_data and "lang" in context.user_data:
+        return context.user_data["lang"]
+    if update and update.effective_user and update.effective_user.language_code:
+        return resolve_lang_code(update.effective_user.language_code)
+    return "es"
+
+def get_medicacion_keyboard(lang: str = "es") -> InlineKeyboardMarkup:
+    """Genera teclado para consultar adherencia a la medicación en el idioma del usuario."""
     keyboard = [
-        [InlineKeyboardButton("✅ Sí, tomada", callback_data="med_si"), InlineKeyboardButton("⚠️ Parcial", callback_data="med_parcial")],
-        [InlineKeyboardButton("❌ No tomada", callback_data="med_no"), InlineKeyboardButton("⏭️ Omitir / No aplica", callback_data="med_skip")]
+        [InlineKeyboardButton(t("med_si", lang), callback_data="med_si"), InlineKeyboardButton(t("med_parcial", lang), callback_data="med_parcial")],
+        [InlineKeyboardButton(t("med_no", lang), callback_data="med_no"), InlineKeyboardButton(t("med_skip", lang), callback_data="med_skip")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -360,34 +369,21 @@ def get_skip_keyboard() -> InlineKeyboardMarkup:
 # ==============================================================================
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Comando /start - Bienvenida concisa e inicio inmediato de registro."""
-    user = update.effective_user
-    welcome_text = (
-        f"✨ **¡Hola, {user.first_name}! Bienvenido/a a Bot-Bip** 💖\n\n"
-        "Tu espacio seguro para registrar tu **estabilidad y descanso**.\n\n"
-        "🛡️ **Comandos clave:**\n"
-        "• `/calma` - Ejercicios & Red de Apoyo (llamadas/mensajes)\n"
-        "• `/contacto` - Añadir personas de confianza\n"
-        "• `/recordatorio` - Configurar la hora de tu aviso diario\n"
-        "• `/dashboard` - Panel de gráficos e informes privados\n\n"
-        "⚡ **¿Cómo está tu nivel de ENERGÍA hoy?** (1 al 10):\n"
-        "*(1 = Exhausto/a | 10 = Imparable)*"
-    )
+    """Comando /start - Da la bienvenida e inicia el primer check-in diario en el idioma del usuario."""
+    lang = get_user_language(update, context)
+    btn = InlineKeyboardMarkup([[InlineKeyboardButton(t("btn_register_now", lang), callback_data="iniciar_registro_ahora")]])
     await update.message.reply_text(
-        welcome_text,
+        t("welcome_start", lang),
         parse_mode="Markdown",
-        reply_markup=get_rating_keyboard("energia")
+        reply_markup=btn
     )
-    return ENERGIA
+    return ConversationHandler.END
 
 
 async def registrar_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Comando /registrar o botón de recordatorio - Inicia el flujo de preguntas."""
-    text = (
-        "⚡ **Registro Diario de Bienestar**\n\n"
-        "**¿Cómo está tu nivel de ENERGÍA hoy?** (1 al 10):\n"
-        "*(1 = Exhausto/a | 10 = Plena energía)*"
-    )
+    """Comando /registrar o botón de recordatorio - Inicia el flujo de preguntas en el idioma del usuario."""
+    lang = get_user_language(update, context)
+    text = t("energy_title", lang)
     if update.callback_query:
         await update.callback_query.answer()
         await update.callback_query.message.reply_text(
@@ -451,15 +447,16 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 async def enviar_informe_pdf_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Comando /informe - Genera y envía directamente el PDF de Informe Clínico al chat."""
+    """Comando /informe - Genera y envía directamente el PDF de Informe Clínico al chat en el idioma del usuario."""
     user_id = update.effective_user.id
-    msg = await update.message.reply_text("📄 **Generando tu Informe Clínico PDF...** Un momento por favor...", parse_mode="Markdown")
+    lang = get_user_language(update, context)
+    msg = await update.message.reply_text(t("pdf_generating", lang), parse_mode="Markdown")
 
     try:
         import pandas as pd
         registros = db.obtener_registros(user_id=user_id)
         if not registros:
-            await msg.edit_text("🌸 **Aviso:** No se encontraron registros de bienestar guardados aún. Inicia con `/registrar`.")
+            await msg.edit_text(t("pdf_no_data", lang), parse_mode="Markdown")
             return
 
         df = pd.DataFrame(registros)
@@ -468,16 +465,16 @@ async def enviar_informe_pdf_command(update: Update, context: ContextTypes.DEFAU
         import ai_insights.pdf_generator as pdf_gen_module
         importlib.reload(pdf_gen_module)
         
-        pdf_bytes = pdf_gen_module.generar_pdf_clinico(df)
+        pdf_bytes = pdf_gen_module.generar_pdf_clinico(df, lang=lang)
         
         import io
         pdf_file = io.BytesIO(pdf_bytes)
-        pdf_file.name = f"Informe_Clinico_Bienestar_{datetime.now().strftime('%Y_%m_%d')}.pdf"
+        pdf_file.name = f"Clinical_Report_{datetime.now().strftime('%Y_%m_%d')}.pdf" if lang != "es" else f"Informe_Clinico_Bienestar_{datetime.now().strftime('%Y_%m_%d')}.pdf"
 
         await update.message.reply_document(
             document=pdf_file,
             filename=pdf_file.name,
-            caption="📄 **Aquí tienes tu Informe Clínico en PDF** listo para tu consulta médica o guardar en tus archivos.",
+            caption=t("pdf_caption", lang),
             parse_mode="Markdown"
         )
         await msg.delete()
@@ -486,21 +483,30 @@ async def enviar_informe_pdf_command(update: Update, context: ContextTypes.DEFAU
         await msg.edit_text(f"⚠️ Ocurrió un inconveniente al generar el PDF: `{err}`", parse_mode="Markdown")
 
 
+async def idioma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Comando /idioma /language - Permite cambiar manualmente el idioma del bot."""
+    lang = get_user_language(update, context)
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🇪🇸 Español", callback_data="set_lang_es"), InlineKeyboardButton("🇬🇧 English", callback_data="set_lang_en")],
+        [InlineKeyboardButton("🇫🇷 Français", callback_data="set_lang_fr")]
+    ])
+    await update.message.reply_text(t("lang_select_title", lang), parse_mode="Markdown", reply_markup=keyboard)
+
+
+async def idioma_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Procesa el botón pulsado en la selección de idioma."""
+    query = update.callback_query
+    await query.answer()
+    if query.data.startswith("set_lang_"):
+        new_lang = query.data.replace("set_lang_", "")
+        context.user_data["lang"] = new_lang
+        await query.edit_message_text(t("lang_changed", new_lang), parse_mode="Markdown")
+
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Comando /ayuda - Muestra los comandos disponibles."""
-    help_text = (
-        "🤖 **Bot-Bip - Comandos de Apoyo & Registro**\n\n"
-        "• `/registrar` - Check-in diario (Energía, Ánimo, Sueño y Medicación).\n"
-        "• `/informe` - Recibir tu **Informe Clínico PDF** directo en el chat.\n"
-        "• `/resumen_semanal` - Ver tu promedios de estabilidad de los últimos 7 días.\n"
-        "• `/dashboard` - Abrir tu panel de gráficos completos en el navegador.\n"
-        "• `/calma` - Espacio de relajación y botones de llamada/mensaje a tu **Red de Apoyo**.\n"
-        "• `/contacto` - Agregar personas de confianza (ej: `/contacto Gabriel +34600000000 Pareja`).\n"
-        "• `/recordatorio` - Configurar la hora de tu notificación diaria.\n"
-        "• `/cancelar` - Cancelar el registro en curso.\n"
-        "• `/ayuda` - Ver este mensaje de ayuda."
-    )
-    await update.message.reply_text(help_text, parse_mode="Markdown")
+    """Comando /ayuda - Muestra los comandos disponibles traducidos al idioma del usuario."""
+    lang = get_user_language(update, context)
+    await update.message.reply_text(t("help_text", lang), parse_mode="Markdown")
 
 
 async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -582,10 +588,15 @@ async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = job.chat_id
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-    btn = InlineKeyboardMarkup([[InlineKeyboardButton("📝 Realizar Registro Ahora", callback_data="iniciar_registro_ahora")]])
+    # Intentar obtener idioma del job o usar fallback
+    lang = "es"
+    if isinstance(job.data, dict) and "lang" in job.data:
+        lang = job.data["lang"]
+
+    btn = InlineKeyboardMarkup([[InlineKeyboardButton(t("btn_register_now", lang), callback_data="iniciar_registro_ahora")]])
     await context.bot.send_message(
         chat_id=chat_id,
-        text="🔔 **¡Hola! Es momento de tu check-in diario de bienestar.**\n\nPresiona el botón de abajo o envía /registrar para responder tus preguntas rápidas.",
+        text=t("reminder_msg", lang),
         parse_mode="Markdown",
         reply_markup=btn
     )
@@ -605,12 +616,7 @@ async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
                     contactos = db.obtener_contactos_emergencia(chat_id)
                     if contactos:
                         user_name = job.data.get("first_name", "tu ser querido") if isinstance(job.data, dict) else "tu ser querido"
-                        msg_apoyo = (
-                            f"💙 **Notificación de Acompañamiento y Rescate:**\n\n"
-                            f"Hola, notamos que han pasado {dias_inactivo} días sin registros de bienestar de {user_name}.\n"
-                            "En momentos de cansancio o bajón, es totalmente normal hacer una pausa. "
-                            "Podría ser un buen momento para enviarle un mensaje cariñoso, una llamada o un abrazo sin presiones. 🌸"
-                        )
+                        msg_apoyo = t("rescue_notification", lang, dias=dias_inactivo, user_name=user_name)
                         await context.bot.send_message(
                             chat_id=chat_id,
                             text=msg_apoyo,
@@ -623,17 +629,17 @@ async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
 async def resumen_semanal_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /resumen_semanal - Muestra el digest motivacional de los últimos 7 días."""
     user_id = update.effective_user.id
+    lang = get_user_language(update, context)
     import pandas as pd
     registros = db.obtener_registros(user_id=user_id)
 
     if not registros:
-        await update.message.reply_text("🌸 **Aviso:** No hay suficientes registros guardados esta semana. ¡Comienza hoy con `/registrar`!")
+        await update.message.reply_text(t("weekly_no_data", lang), parse_mode="Markdown")
         return
 
     df = pd.DataFrame(registros)
 
     # Filtrar últimos 7 días
-    import pandas as pd
     df['fecha'] = pd.to_datetime(df['fecha'])
     hace_semana = pd.Timestamp.now() - pd.Timedelta(days=7)
     df_7d = df[df['fecha'] >= hace_semana]
@@ -644,22 +650,10 @@ async def resumen_semanal_command(update: Update, context: ContextTypes.DEFAULT_
     total_registros = len(df_7d)
     avg_energia = df_7d['energia'].mean()
     avg_humor = df_7d['humor'].mean()
-    avg_sueno = df_7d['sueno_horas'].mean() if 'sueno_horas' in df_7d.columns else 8.0
+    avg_sueno = df_7d['sueno_horas'].mean()
 
-    msg_semanal = (
-        f"🌸 **Tu Digest Semanal de Bienestar** 📊\n\n"
-        f"🗓️ **Días registrados esta semana:** {total_registros}/7 días\n"
-        f"⚡ **Promedio Energía:** {avg_energia:.1f}/10\n"
-        f"🎭 **Promedio Ánimo:** {avg_humor:.1f}/10\n"
-        f"💤 **Promedio Descanso:** {avg_sueno:.1f}h/noche\n\n"
-        "✨ *¡Gran trabajo manteniendo la constancia de tus rutinas! Recuerda que puedes descargar tu informe en PDF con /informe.*"
-    )
-
-    url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
-    url_personalizada = f"{url_base}?user_id={user_id}"
-    btn = InlineKeyboardMarkup([[InlineKeyboardButton("📊 Ver Gráficos Completos", url=url_personalizada)]])
-
-    await update.message.reply_text(msg_semanal, parse_mode="Markdown", reply_markup=btn)
+    msg = t("weekly_digest_title", lang, days=total_registros, energia=avg_energia, humor=avg_humor, sueno=avg_sueno)
+    await update.message.reply_text(msg, parse_mode="Markdown")
 
 
 async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -769,7 +763,7 @@ async def test_recordatorio_command(update: Update, context: ContextTypes.DEFAUL
         chat_id=chat_id,
         name=f"test_{chat_id}"
     )
-    await update.message.reply_text("⏱️ **Recordatorio de prueba programado.** Te llegará un mensaje en 5 segundos...", parse_mode="Markdown")
+    await update.message.reply_text("⏱️ **Recordatorio de prueba programado.** Te llegará un mensaje en 5 segundos.", parse_mode="Markdown")
 
 
 # ==============================================================================
@@ -786,6 +780,7 @@ async def setup_bot_commands(app) -> None:
         BotCommand("calma", "💙 Espacio de relax y Red de Apoyo"),
         BotCommand("contacto", "🤝 Agregar persona de confianza"),
         BotCommand("recordatorio", "⏰ Configurar hora de notificación"),
+        BotCommand("idioma", "🌐 Cambiar idioma / Change language"),
         BotCommand("ayuda", "❓ Ver guía de ayuda y comandos")
     ]
     await app.bot.set_my_commands(commands)
@@ -847,6 +842,10 @@ def main():
     app.add_handler(CommandHandler("resumen_semanal", resumen_semanal_command))
     app.add_handler(CommandHandler("stats", stats_command))
     app.add_handler(CommandHandler("test_recordatorio", test_recordatorio_command))
+    app.add_handler(CommandHandler("idioma", idioma_command))
+    app.add_handler(CommandHandler("language", idioma_command))
+    app.add_handler(CallbackQueryHandler(idioma_callback_handler, pattern="^set_lang_"))
+    app.add_handler(CommandHandler("help", help_command))
 
     logger.info("Bot-Bip iniciando en modo Polling...")
     app.run_polling()

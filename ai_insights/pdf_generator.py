@@ -2,15 +2,22 @@ import io
 from fpdf import FPDF
 import pandas as pd
 from datetime import datetime
+from i18n import t, resolve_lang_code
 
 class InformeClinicoPDF(FPDF):
+    def __init__(self, lang: str = "es"):
+        super().__init__()
+        self.lang = resolve_lang_code(lang)
+
     def header(self):
         self.set_font("Helvetica", "B", 16)
         self.set_text_color(30, 41, 59) # Slate Dark
-        self.cell(0, 10, "INFORME CLINICO DE BIENESTAR PSICOAFECTIVO", ln=True, align="C")
+        title = t("pdf_report_title", self.lang)
+        self.cell(0, 10, title, ln=True, align="C")
         self.set_font("Helvetica", "I", 10)
         self.set_text_color(100, 116, 139)
-        self.cell(0, 5, "Generado por Bot-Bip - Sistema de Monitorización Diaria", ln=True, align="C")
+        subtitle = t("pdf_report_subtitle", self.lang)
+        self.cell(0, 5, subtitle, ln=True, align="C")
         self.ln(5)
         # Línea divisoria
         self.set_draw_color(226, 232, 240)
@@ -22,17 +29,19 @@ class InformeClinicoPDF(FPDF):
         self.set_y(-15)
         self.set_font("Helvetica", "I", 8)
         self.set_text_color(148, 163, 184)
-        self.cell(0, 10, f"Página {self.page_no()} | Documento de apoyo para consulta profesional de salud mental", align="C")
+        footer_text = f"Página {self.page_no()} | Bot-Bip Clinical Wellness Report" if self.lang != "es" else f"Página {self.page_no()} | Documento de apoyo para consulta profesional de salud mental"
+        self.cell(0, 10, footer_text, align="C")
 
-def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: str = "") -> bytes:
-    pdf = InformeClinicoPDF()
+def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: str = "", lang: str = "es") -> bytes:
+    pdf = InformeClinicoPDF(lang=lang)
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
     # 1. Información General del Paciente / Periodo
     pdf.set_font("Helvetica", "B", 12)
     pdf.set_text_color(15, 23, 42)
-    pdf.cell(0, 7, "Resumen Clinico para Consulta Medica", ln=True)
+    head_sec = "Clinical Summary for Medical Consultation" if lang == "en" else ("Résumé clinique pour consultation médicale" if lang == "fr" else "Resumen Clinico para Consulta Medica")
+    pdf.cell(0, 7, head_sec, ln=True)
     
     pdf.set_font("Helvetica", "", 10)
     fecha_actual = datetime.now().strftime("%d/%m/%Y")
@@ -41,9 +50,13 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
     periodo_str = "N/A"
     if not df.empty and "fecha" in df.columns:
         fechas_ord = pd.to_datetime(df["fecha"]).sort_values()
-        periodo_str = f"{fechas_ord.iloc[0].strftime('%d/%m/%Y')} al {fechas_ord.iloc[-1].strftime('%d/%m/%Y')}"
+        periodo_str = f"{fechas_ord.iloc[0].strftime('%d/%m/%Y')} - {fechas_ord.iloc[-1].strftime('%d/%m/%Y')}"
 
-    pdf.multi_cell(0, 6, f"- Fecha de emision: {fecha_actual}\n- Periodo evaluado: {periodo_str}\n- Total de evaluaciones registradas: {total_registros}")
+    lbl_date = "Issue date" if lang == "en" else ("Date d'émission" if lang == "fr" else "Fecha de emision")
+    lbl_period = "Evaluated period" if lang == "en" else ("Période évaluée" if lang == "fr" else "Periodo evaluado")
+    lbl_count = "Total logged entries" if lang == "en" else ("Total des évaluations" if lang == "fr" else "Total de evaluaciones registradas")
+
+    pdf.multi_cell(0, 6, f"- {lbl_date}: {fecha_actual}\n- {lbl_period}: {periodo_str}\n- {lbl_count}: {total_registros}")
     pdf.ln(4)
 
     # 2. Promedios y Métricas Clave
@@ -54,19 +67,24 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
 
         pdf.set_fill_color(241, 245, 249)
         pdf.set_font("Helvetica", "B", 11)
-        pdf.cell(0, 8, "  PROMEDIOS DEL PERIODO", ln=True, fill=True)
+        lbl_avg_sec = "  PERIOD AVERAGES" if lang == "en" else ("  MOYENNES DE LA PÉRIODE" if lang == "fr" else "  PROMEDIOS DEL PERIODO")
+        pdf.cell(0, 8, lbl_avg_sec, ln=True, fill=True)
         pdf.ln(2)
 
         pdf.set_font("Helvetica", "", 10)
-        pdf.cell(63, 7, f"Energia Promedio: {prom_energia}/10", border=1, align="C")
-        pdf.cell(63, 7, f"Animo Promedio: {prom_humor}/10", border=1, align="C")
-        pdf.cell(64, 7, f"Sueno Promedio: {prom_sueno}h", border=1, align="C")
+        lbl_e = t("pdf_col_energy", lang)
+        lbl_h = t("pdf_col_mood", lang)
+        lbl_s = t("pdf_col_sleep", lang)
+        pdf.cell(63, 7, f"{lbl_e}: {prom_energia}/10", border=1, align="C")
+        pdf.cell(63, 7, f"{lbl_h}: {prom_humor}/10", border=1, align="C")
+        pdf.cell(64, 7, f"{lbl_s}: {prom_sueno}h", border=1, align="C")
         pdf.ln(12)
 
         # 2b. Grafica de Evolución Temporal (Efecto Vectorial)
         pdf.set_fill_color(248, 250, 252)
         pdf.set_font("Helvetica", "B", 10)
-        pdf.cell(0, 7, "  GRAFICA DE EVOLUCION Y TENDENCIA DE BIENESTAR", ln=True, fill=True)
+        lbl_chart_title = "  WELLNESS TREND CHART" if lang == "en" else ("  GRAPHIQUE D'ÉVOLUTION DU BIEN-ÊTRE" if lang == "fr" else "  GRAFICA DE EVOLUCION Y TENDENCIA DE BIENESTAR")
+        pdf.cell(0, 7, lbl_chart_title, ln=True, fill=True)
         pdf.ln(2)
 
         # Marco del grafico
@@ -79,19 +97,19 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
         pdf.set_line_width(0.3)
         pdf.rect(gx, gy, gw, gh)
 
-        # Grid lines (0, 5, 10)
+        # Grid lines
         pdf.set_draw_color(241, 245, 249)
         pdf.set_line_width(0.2)
         pdf.line(gx, gy + gh/2, gx + gw, gy + gh/2)
 
         # Leyenda
         pdf.set_font("Helvetica", "", 8)
-        pdf.set_text_color(239, 68, 68) # Rojo Energia
-        pdf.text(gx + 5, gy - 2, "[---] Energia")
-        pdf.set_text_color(59, 130, 246) # Azul Animo
-        pdf.text(gx + 50, gy - 2, "[---] Animo")
-        pdf.set_text_color(16, 185, 129) # Verde Sueno
-        pdf.text(gx + 90, gy - 2, "[---] Sueno (Horas)")
+        pdf.set_text_color(239, 68, 68)
+        pdf.text(gx + 5, gy - 2, f"[---] {lbl_e}")
+        pdf.set_text_color(59, 130, 246)
+        pdf.text(gx + 50, gy - 2, f"[---] {lbl_h}")
+        pdf.set_text_color(16, 185, 129)
+        pdf.text(gx + 90, gy - 2, f"[---] {lbl_s}")
         pdf.set_text_color(30, 41, 59)
 
         # Dibujar puntos y líneas de la gráfica
@@ -116,24 +134,22 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
                 pts_h.append((px, py_h))
                 pts_s.append((px, py_s))
 
-            # 1. Dibujar Líneas con mayor grosor (1.5mm)
             if n_points > 1:
-                pdf.set_draw_color(239, 68, 68) # Rojo Energia
+                pdf.set_draw_color(239, 68, 68)
                 pdf.set_line_width(1.2)
                 for i in range(len(pts_e) - 1):
                     pdf.line(pts_e[i][0], pts_e[i][1], pts_e[i+1][0], pts_e[i+1][1])
 
-                pdf.set_draw_color(59, 130, 246) # Azul Animo
+                pdf.set_draw_color(59, 130, 246)
                 pdf.set_line_width(1.2)
                 for i in range(len(pts_h) - 1):
                     pdf.line(pts_h[i][0], pts_h[i][1], pts_h[i+1][0], pts_h[i+1][1])
 
-                pdf.set_draw_color(16, 185, 129) # Verde Sueno
+                pdf.set_draw_color(16, 185, 129)
                 pdf.set_line_width(1.2)
                 for i in range(len(pts_s) - 1):
                     pdf.line(pts_s[i][0], pts_s[i][1], pts_s[i+1][0], pts_s[i+1][1])
 
-            # 2. Dibujar Puntos/Pulsos Destacados Visibles (Radio 2.2mm con relleno)
             for px, py in pts_e:
                 pdf.set_fill_color(239, 68, 68)
                 pdf.set_draw_color(185, 28, 28)
@@ -153,10 +169,11 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
 
     # 3. Resumen Interpretativo / Diagnóstico con IA (Si está presente)
     if ai_summary:
-        pdf.set_fill_color(238, 242, 255) # Indigo soft
+        pdf.set_fill_color(238, 242, 255)
         pdf.set_font("Helvetica", "B", 11)
         pdf.set_text_color(49, 46, 129)
-        pdf.cell(0, 8, "  ANALISIS DE TENDENCIAS Y PATRONES (AI INSIGHTS)", ln=True, fill=True)
+        lbl_ai_sec = "  AI INSIGHTS AND TREND ANALYSIS" if lang == "en" else ("  ANALYSE ET TENDANCES PAR IA" if lang == "fr" else "  ANALISIS DE TENDENCIAS Y PATRONES (AI INSIGHTS)")
+        pdf.cell(0, 8, lbl_ai_sec, ln=True, fill=True)
         pdf.ln(2)
         
         pdf.set_font("Helvetica", "", 9.5)
@@ -170,18 +187,19 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
     pdf.set_fill_color(241, 245, 249)
     pdf.set_font("Helvetica", "B", 11)
     pdf.set_text_color(15, 23, 42)
-    pdf.cell(0, 8, "  DETALLE DE REGISTROS DIARIOS Y NOTAS DE SINTOMAS", ln=True, fill=True)
+    lbl_table_sec = "  DAILY LOG DETAILS AND SYMPTOM NOTES" if lang == "en" else ("  DÉTAIL DES ENREGISTREMENTS QUOTIDIENS ET NOTES" if lang == "fr" else "  DETALLE DE REGISTROS DIARIOS Y NOTAS DE SINTOMAS")
+    pdf.cell(0, 8, lbl_table_sec, ln=True, fill=True)
     pdf.ln(3)
 
     # Cabecera de Tabla
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_fill_color(226, 232, 240)
-    pdf.cell(26, 7, "Fecha", border=1, align="C", fill=True)
-    pdf.cell(18, 7, "Energia", border=1, align="C", fill=True)
-    pdf.cell(18, 7, "Animo", border=1, align="C", fill=True)
-    pdf.cell(18, 7, "Sueno", border=1, align="C", fill=True)
-    pdf.cell(24, 7, "Medicacion", border=1, align="C", fill=True)
-    pdf.cell(86, 7, "Comentarios / Notas", border=1, align="L", fill=True)
+    pdf.cell(26, 7, t("pdf_col_date", lang), border=1, align="C", fill=True)
+    pdf.cell(18, 7, t("pdf_col_energy", lang), border=1, align="C", fill=True)
+    pdf.cell(18, 7, t("pdf_col_mood", lang), border=1, align="C", fill=True)
+    pdf.cell(18, 7, t("pdf_col_sleep", lang), border=1, align="C", fill=True)
+    pdf.cell(24, 7, t("pdf_col_medication", lang), border=1, align="C", fill=True)
+    pdf.cell(86, 7, t("pdf_col_notes", lang), border=1, align="L", fill=True)
     pdf.ln(7)
 
     pdf.set_font("Helvetica", "", 8.5)
