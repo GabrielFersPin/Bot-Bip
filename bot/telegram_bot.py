@@ -710,16 +710,24 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
         hora_str = query.data.replace("set_hora_", "")
         chat_id = update.effective_chat.id
         time_obj = datetime.strptime(hora_str, "%H:%M").time()
+        
+        # Asignar zona horaria (Europe/Madrid por defecto o UTC)
+        try:
+            import zoneinfo
+            tz = zoneinfo.ZoneInfo("Europe/Madrid")
+        except Exception:
+            import pytz
+            tz = pytz.timezone("Europe/Madrid")
 
         # Eliminar jobs previos
         current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
         for job in current_jobs:
             job.schedule_removal()
 
-        # Programar nuevo recordatorio diario
+        # Programar nuevo recordatorio diario ajustado a la zona horaria
         context.job_queue.run_daily(
             enviar_recordatorio_job,
-            time=time_obj,
+            time=time_obj.replace(tzinfo=tz),
             chat_id=chat_id,
             name=str(chat_id)
         )
