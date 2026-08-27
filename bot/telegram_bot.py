@@ -494,12 +494,22 @@ async def idioma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 async def idioma_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Procesa el botón pulsado en la selección de idioma."""
+    """Procesa el botón pulsado en la selección de idioma y actualiza los comandos del menú flotante para el usuario."""
     query = update.callback_query
     await query.answer()
     if query.data.startswith("set_lang_"):
         new_lang = query.data.replace("set_lang_", "")
         context.user_data["lang"] = new_lang
+
+        # Actualizar los comandos del menú azul de Telegram para este usuario/chat en tiempo real
+        try:
+            from telegram import BotCommandScopeChat
+            chat_id = update.effective_chat.id
+            target_cmds = COMMANDS_BY_LANG.get(new_lang, COMMANDS_BY_LANG["es"])
+            await context.bot.set_my_commands(target_cmds, scope=BotCommandScopeChat(chat_id=chat_id))
+        except Exception as err:
+            logger.error(f"Error actualizando menú de comandos para chat {update.effective_chat.id}: {err}")
+
         await query.edit_message_text(t("lang_changed", new_lang), parse_mode="Markdown")
 
 
@@ -772,7 +782,8 @@ async def test_recordatorio_command(update: Update, context: ContextTypes.DEFAUL
 
 async def setup_bot_commands(app) -> None:
     """Configura los comandos visibles en el botón azul de Menú de Telegram."""
-    commands = [
+COMMANDS_BY_LANG = {
+    "es": [
         BotCommand("registrar", "⚡ Iniciar check-in diario de bienestar"),
         BotCommand("informe", "📄 Descargar Informe Clínico en PDF"),
         BotCommand("resumen_semanal", "🌸 Ver promedios de la semana"),
@@ -780,10 +791,40 @@ async def setup_bot_commands(app) -> None:
         BotCommand("calma", "💙 Espacio de relax y Red de Apoyo"),
         BotCommand("contacto", "🤝 Agregar persona de confianza"),
         BotCommand("recordatorio", "⏰ Configurar hora de notificación"),
-        BotCommand("idioma", "🌐 Cambiar idioma / Change language"),
+        BotCommand("idioma", "🌐 Cambiar idioma / Language"),
         BotCommand("ayuda", "❓ Ver guía de ayuda y comandos")
+    ],
+    "en": [
+        BotCommand("registrar", "⚡ Start daily wellness check-in"),
+        BotCommand("informe", "📄 Download Clinical PDF Report"),
+        BotCommand("resumen_semanal", "🌸 View weekly averages"),
+        BotCommand("dashboard", "📊 Open Dashboard with full charts"),
+        BotCommand("calma", "💙 Relaxation space & Support Network"),
+        BotCommand("contacto", "🤝 Add trusted contact"),
+        BotCommand("recordatorio", "⏰ Set daily notification time"),
+        BotCommand("idioma", "🌐 Change language / Idioma"),
+        BotCommand("ayuda", "❓ View help guide and commands")
+    ],
+    "fr": [
+        BotCommand("registrar", "⚡ Commencer le suivi quotidien de bien-être"),
+        BotCommand("informe", "📄 Télécharger el rapport clinique PDF"),
+        BotCommand("resumen_semanal", "🌸 Voir les moyennes de la semaine"),
+        BotCommand("dashboard", "📊 Ouvrir le tableau de bord avec graphiques"),
+        BotCommand("calma", "💙 Espace relaxation & Réseau de soutien"),
+        BotCommand("contacto", "🤝 Ajouter un contact de confiance"),
+        BotCommand("recordatorio", "⏰ Configurer l'heure de notification"),
+        BotCommand("idioma", "🌐 Changer de langue / Language"),
+        BotCommand("ayuda", "❓ Voir el guide d'aide et les commandes")
     ]
-    await app.bot.set_my_commands(commands)
+}
+
+
+async def setup_bot_commands(app) -> None:
+    """Configura los comandos visibles en el menú flotante de Telegram para todos los idiomas."""
+    await app.bot.set_my_commands(COMMANDS_BY_LANG["es"])
+    await app.bot.set_my_commands(COMMANDS_BY_LANG["es"], language_code="es")
+    await app.bot.set_my_commands(COMMANDS_BY_LANG["en"], language_code="en")
+    await app.bot.set_my_commands(COMMANDS_BY_LANG["fr"], language_code="fr")
 
 
 def main():
