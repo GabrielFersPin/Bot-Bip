@@ -409,15 +409,28 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         return
 
     try:
-        usuarios = db.obtener_usuarios_unicos()
         registros = db.obtener_registros()
-        total_usuarios = len(usuarios)
         total_registros = len(registros)
+
+        # Agrupar registros por user_id
+        conteo_por_usuario = {}
+        for r in registros:
+            uid = r.get("user_id")
+            if uid:
+                conteo_por_usuario[uid] = conteo_por_usuario.get(uid, 0) + 1
+
+        total_usuarios = len(conteo_por_usuario)
+
+        detalle_usuarios = ""
+        for idx, (uid, count) in enumerate(conteo_por_usuario.items(), 1):
+            detalle_usuarios += f"  {idx}. `ID: {uid}` — **{count}** registro(s)\n"
 
         msg = (
             f"📊 **Métricas de Uso de Bot-Bip (Administración)**\n\n"
             f"👥 **Usuarios Totales:** {total_usuarios}\n"
             f"📝 **Registros Diarios Totales:** {total_registros}\n\n"
+            f"🔍 **Desglose por Usuario:**\n"
+            f"{detalle_usuarios}\n"
             f"✨ *Métricas globales del sistema.*"
         )
         await update.message.reply_text(msg, parse_mode="Markdown")
