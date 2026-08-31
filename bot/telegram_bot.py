@@ -869,6 +869,7 @@ async def setup_bot_commands(app) -> None:
         "• /dashboard - Tableau de bord privé & rapports"
     )
 
+    await app.bot.set_my_description(desc_es)
     await app.bot.set_my_description(desc_es, language_code="es")
     await app.bot.set_my_description(desc_en, language_code="en")
     await app.bot.set_my_description(desc_fr, language_code="fr")
