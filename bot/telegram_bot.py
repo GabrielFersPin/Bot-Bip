@@ -65,47 +65,32 @@ def get_sueno_keyboard() -> InlineKeyboardMarkup:
 async def calma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /calma - Espacio de apoyo rápido con acceso directo a la Red de Apoyo."""
     user_id = update.effective_user.id
+    lang = get_user_language(update, context)
     contactos = db.obtener_contactos_emergencia(user_id)
 
     keyboard = []
     text_contactos = ""
 
     if contactos:
-        text_contactos = "\n\n🤝 **Tu Red de Apoyo de Confianza:**\n"
+        text_contactos = t("calma_contacts_header", lang)
         for c in contactos:
             nombre = c.get("nombre")
             telefono = c.get("telefono", "").replace(" ", "").replace("-", "")
             relacion = c.get("relacion", "Apoyo")
             text_contactos += f"• **{nombre}** ({relacion}): `{telefono}`\n"
             
-            # Usar urllib.parse.quote_plus para que WhatsApp formatee los espacios de manera limpia
             import urllib.parse
-            mensaje_apoyo = f"Hola {nombre}, estoy pasando por un momento difícil y necesito apoyo."
+            mensaje_apoyo = "Hello, I am going through a tough moment and need support." if lang == "en" else ("Bonjour, je traverse un moment difficile." if lang == "fr" else f"Hola {nombre}, estoy pasando por un momento difícil y necesito apoyo.")
             mensaje_encoded = urllib.parse.quote_plus(mensaje_apoyo)
             
             clean_phone = telefono.replace("+", "")
             keyboard.append([
-                InlineKeyboardButton(f"💬 Mensaje a {nombre}", url=f"https://wa.me/{clean_phone}?text={mensaje_encoded}")
+                InlineKeyboardButton(t("calma_btn_msg", lang).format(nombre=nombre), url=f"https://wa.me/{clean_phone}?text={mensaje_encoded}")
             ])
     else:
-        text_contactos = "\n\n💡 *Tip: Puedes agregar tus contactos de confianza enviando:* `/contacto Nombre Telefono` (ej: `/contacto Gabriel +34600000000`)"
+        text_contactos = t("calma_contact_tip", lang)
 
-    calma_text = (
-        "💙 **Espacio de Calma & Red de Apoyo** 🌿\n\n"
-        "Tómate un momento. Estás a salvo. Vamos a conectar con el presente:\n\n"
-        "🌬️ **Técnica 4-7-8 de Respiración:**\n"
-        "1. Inhala por la nariz contando hasta **4**.\n"
-        "2. Mantén el aire contando hasta **7**.\n"
-        "3. Exhala despacio por la boca contando hasta **8**.\n\n"
-        "👁️ **Técnica 5-4-3-2-1 de Anclaje:**\n"
-        "• Nombra **5 cosas** que veas a tu alrededor.\n"
-        "• Nombra **4 cosas** que puedas tocar.\n"
-        "• Nombra **3 sonidos** que escuches.\n"
-        "• Nombra **2 olores** que percibas.\n"
-        "• Nombra **1 emoción** que sientas sin juzgarla.\n\n"
-        "💊 *Recordatorio amable: ¿Has tomado tu medicación habitual de hoy?*"
-        f"{text_contactos}"
-    )
+    calma_text = t("calma_title", lang) + f"{text_contactos}"
 
     reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
     await update.message.reply_text(calma_text, parse_mode="Markdown", reply_markup=reply_markup)
@@ -396,11 +381,11 @@ async def registrar_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 
 async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Comando /dashboard - Envia enlace nativo a Streamlit filtrado por el ID del usuario."""
+    """Comando /dashboard - Envia enlace nativo a Streamlit filtrado por el ID del usuario y su idioma."""
     user_id = update.effective_user.id
     lang = get_user_language(update, context)
     url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
-    url_personalizada = f"{url_base}?user_id={user_id}"
+    url_personalizada = f"{url_base}?user_id={user_id}&lang={lang}"
     keyboard = [
         [InlineKeyboardButton(t("dashboard_btn", lang), url=url_personalizada)]
     ]
