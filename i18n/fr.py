@@ -61,6 +61,14 @@ STRINGS = {
     "lang_select_title": "🌐 **Sélection de la langue / Language Selection / Selección de Idioma**\n\nVeuillez choisir votre langue préférée :",
     "lang_changed": "✅ **Langue changée en Français avec succès.**",
 
+    # Dashboard
+    "dashboard_btn": "📊 Ouvrir Mon Tableau de Bord",
+    "dashboard_msg": "✨ **Votre Tableau de Bord Privé de Bien-être**\n\nAppuyez sur le bouton ci-dessous pour afficher vos graphiques de stabilité, consulter votre assistant IA et télécharger votre rapport médical en PDF pour vos rendez-vous :",
+
+    # Cancel & Reminder Off
+    "cancel_msg": "❌ Suivi annulé. Vous pouvez recommencer à tout moment en utilisant /registrar.",
+    "reminder_disabled": "🔕 Rappel quotidien désactivé.",
+
     # Help
     "help_text": "🤖 **Bot-Bip - Commandes de soutien et de suivi**\n\n• `/registrar` - Suivi quotidien (Énergie, Humeur, Sommeil & Médication).\n• `/informe` - Recevoir votre **Rapport Clinique PDF** directement dans le chat.\n• `/resumen_semanal` - Voir vos moyennes de stabilité sur 7 jours.\n• `/dashboard` - Ouvrir votre tableau de bord interactif dans le navigateur.\n• `/calma` - Espace de relaxation et boutons d'appel/message rapide vers votre **Réseau de soutien**.\n• `/contacto` - Ajouter une personne de confiance.\n• `/recordatorio` - Configurer l'heure de votre notification quotidienne.\n• `/idioma` - Changer de langue (Espagnol, Anglais, Français).\n• `/cancelar` - Annuler le suivi en cours.\n• `/ayuda` - Afficher ce message d'aide."
 }

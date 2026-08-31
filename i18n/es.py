@@ -30,15 +30,19 @@ STRINGS = {
     "calma_contacts_header": "\n\n🤝 **Tu Red de Apoyo de Confianza:**\n",
     "calma_btn_msg": "💬 Mensaje a {nombre}",
 
+    # Cancelar y Recordatorio Off
+    "cancel_msg": "❌ Registro cancelado. Puedes iniciar de nuevo cuando quieras usando /registrar.",
+    "reminder_disabled": "🔕 Recordatorio diario desactivado.",
+
     # Contacto
-    "contacto_usage": "⚠️ **Uso correcto:** `/contacto Nombre Telefono [Relacion]`\nEjemplo: `/contacto Gabriel +34600000000 Pareja`",
-    "contacto_saved": "✅ **Contacto guardado con éxito:**\n• **Nombre:** {nombre}\n• **Teléfono:** {telefono}\n• **Relación:** {relacion}",
+    "contacto_usage": "⚠️ **Formato para agregar contacto:**\n`/contacto Nombre Telefono [Relacion]`\n\nEjemplo:\n`/contacto Gabriel +34600000000 Pareja`",
+    "contacto_saved": "✅ **Contacto añadido a tu Red de Apoyo:**\n👤 **Nombre:** {nombre}\n📞 **Teléfono:** `{telefono}`\n🏷️ **Relación:** {relacion}\n\nAhora aparecerá con botones de llamada y mensaje directo al usar `/calma`.",
 
     # Recordatorio e Inactividad
     "reminder_msg": "🔔 **¡Hola! Es momento de tu check-in diario de bienestar.**\n\nPresiona el botón de abajo o envía /registrar para responder tus preguntas rápidas.",
     "rescue_notification": "💙 **Notificación de Acompañamiento y Rescate:**\n\nHola, notamos que han pasado {dias} días sin registros de bienestar de {user_name}.\nEn momentos de cansancio o bajón, es totalmente normal hacer una pausa. Podría ser un buen momento para enviarle un mensaje cariñoso, una llamada o un abrazo sin presiones. 🌸",
     "reminder_config_title": "⏰ **Configuración de Recordatorio Diario**\n\nSelecciona el horario en el que prefieres recibir tu notificación diaria:",
-    "reminder_configured": "✅ **¡Excelente! Recordatorio configurado.**\n\nTe enviaré una notificación diaria automática a las **{hora}hs** para realizar tu check-in.\n*(Puedes cambiar la hora cuando quieras con /recordatorio)*",
+    "reminder_configured": "✅ **¡Excelente! Recordatorio configurado.**\n\nTe enviaré una notificación diaria automática a las **{hora}** para realizar tu check-in.\n*(Puedes cambiar la hora cuando quieras con /recordatorio)*",
 
     # Resumen Semanal
     "weekly_no_data": "🌸 **Aviso:** No hay suficientes registros guardados esta semana. ¡Comienza hoy con `/registrar`!",
@@ -60,7 +64,11 @@ STRINGS = {
     # Selección de Idioma
     "lang_select_title": "🌐 **Selección de Idioma / Language Selection / Sélection de la langue**\n\nPor favor, elige tu idioma preferido:",
     "lang_changed": "✅ **Idioma cambiado a Español correctamente.**",
-    
+
+    # Dashboard
+    "dashboard_btn": "📊 Abrir Mi Resumen de Bienestar",
+    "dashboard_msg": "✨ **Tu Panel Privado de Bienestar**\n\nPresiona el botón de abajo para ver tus gráficos de estabilidad, consultar a tu asistente de bienestar y descargar tu informe PDF para la consulta médica:",
+
     # Ayuda
     "help_text": "🤖 **Bot-Bip - Comandos de Apoyo & Registro**\n\n• `/registrar` - Check-in diario (Energía, Ánimo, Sueño y Medicación).\n• `/informe` - Recibir tu **Informe Clínico PDF** directo en el chat.\n• `/resumen_semanal` - Ver tu promedios de estabilidad de los últimos 7 días.\n• `/dashboard` - Abrir tu panel de gráficos completos en el navegador.\n• `/calma` - Espacio de relajación y botones de llamada/mensaje a tu **Red de Apoyo**.\n• `/contacto` - Agregar personas de confianza.\n• `/recordatorio` - Configurar la hora de tu notificación diaria.\n• `/idioma` - Cambiar idioma (Español, English, Français).\n• `/cancelar` - Cancelar el registro en curso.\n• `/ayuda` - Ver este mensaje de ayuda."
 }

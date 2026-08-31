@@ -61,6 +61,14 @@ STRINGS = {
     "lang_select_title": "🌐 **Language Selection / Selección de Idioma / Sélection de la langue**\n\nPlease select your preferred language:",
     "lang_changed": "✅ **Language changed to English successfully.**",
 
+    # Dashboard
+    "dashboard_btn": "📊 Open My Wellness Dashboard",
+    "dashboard_msg": "✨ **Your Private Wellness Dashboard**\n\nTap the button below to view your stability charts, consult your AI wellness assistant, and download your clinical PDF report for doctor appointments:",
+
+    # Cancel & Reminder Off
+    "cancel_msg": "❌ Check-in canceled. You can start again whenever you want using /registrar.",
+    "reminder_disabled": "🔕 Daily reminder turned off.",
+
     # Help
     "help_text": "🤖 **Bot-Bip - Support & Check-in Commands**\n\n• `/registrar` - Daily check-in (Energy, Mood, Sleep & Medication).\n• `/informe` - Receive your **Clinical PDF Report** directly in chat.\n• `/resumen_semanal` - View your 7-day stability averages.\n• `/dashboard` - Open your full browser interactive dashboard.\n• `/calma` - Relaxation space and quick call/message buttons for your **Support Network**.\n• `/contacto` - Add a trusted contact person.\n• `/recordatorio` - Set your daily notification time.\n• `/idioma` - Change language (Spanish, English, French).\n• `/cancelar` - Cancel the current check-in.\n• `/ayuda` - Show this help message."
 }

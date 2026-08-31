@@ -111,15 +111,14 @@ async def calma_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     await update.message.reply_text(calma_text, parse_mode="Markdown", reply_markup=reply_markup)
 
 
-async def agregar_contacto_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def contacto_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /contacto - Permite registrar un número de teléfono de la red de apoyo."""
     user_id = update.effective_user.id
+    lang = get_user_language(update, context)
+
     if not context.args or len(context.args) < 2:
         await update.message.reply_text(
-            "⚠️ **Formato para agregar contacto:**\n"
-            "`/contacto Nombre Telefono [Relacion]`\n\n"
-            "Ejemplo:\n`/contacto Gabriel +34600000000 Pareja`\n"
-            "`/contacto Dra.Ramos +34611111111 Terapeuta`",
+            t("contacto_usage", lang),
             parse_mode="Markdown"
         )
         return
@@ -132,15 +131,11 @@ async def agregar_contacto_command(update: Update, context: ContextTypes.DEFAULT
 
     if res.get("success"):
         await update.message.reply_text(
-            f"✅ **Contacto añadido a tu Red de Apoyo:**\n"
-            f"👤 **Nombre:** {nombre}\n"
-            f"📞 **Teléfono:** `{telefono}`\n"
-            f"🏷️ **Relación:** {relacion}\n\n"
-            "Ahora aparecerá con botones de llamada y mensaje directo al usar `/calma`.",
+            t("contacto_saved", lang).format(nombre=nombre, telefono=telefono, relacion=relacion),
             parse_mode="Markdown"
         )
     else:
-        await update.message.reply_text(f"❌ Error al guardar contacto: `{res.get('error')}`", parse_mode="Markdown")
+        await update.message.reply_text(f"❌ Error: `{res.get('error')}`", parse_mode="Markdown")
 
 
 async def humor_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -403,16 +398,16 @@ async def registrar_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def dashboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Comando /dashboard - Envia enlace nativo a Streamlit filtrado por el ID del usuario."""
     user_id = update.effective_user.id
+    lang = get_user_language(update, context)
     url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
     url_personalizada = f"{url_base}?user_id={user_id}"
     keyboard = [
-        [InlineKeyboardButton("📊 Abrir Mi Resumen de Bienestar", url=url_personalizada)]
+        [InlineKeyboardButton(t("dashboard_btn", lang), url=url_personalizada)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
-        "✨ **Tu Panel Privado de Bienestar**\n\n"
-        "Presiona el botón de abajo para ver tus gráficos de estabilidad, consultar a tu asistente de bienestar y descargar tu informe PDF para la consulta médica:",
+        t("dashboard_msg", lang),
         parse_mode="Markdown",
         reply_markup=reply_markup
     )
@@ -521,9 +516,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Comando /cancelar - Cancela la conversación activa."""
+    lang = get_user_language(update, context)
     context.user_data.clear()
     await update.message.reply_text(
-        "❌ Registro cancelado. Puedes iniciar de nuevo cuando quieras usando /registrar.",
+        t("cancel_msg", lang),
         reply_markup=ReplyKeyboardRemove()
     )
     return ConversationHandler.END
@@ -759,7 +755,8 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
 
 
 async def remove_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("🔕 Recordatorio diario desactivado.")
+    lang = get_user_language(update, context)
+    await update.message.reply_text(t("reminder_disabled", lang))
 
 
 async def test_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
