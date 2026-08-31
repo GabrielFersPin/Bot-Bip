@@ -840,24 +840,33 @@ async def setup_bot_commands(app) -> None:
     await app.bot.set_my_short_description("Personal psychoaffective wellness & daily check-in assistant. 🌸", language_code="en")
     await app.bot.set_my_short_description("Assistant personnel de suivi psycho-affectif et bien-être quotidien. 🌸", language_code="fr")
 
-    # Mensaje de presentación / pantalla de inicio (Aparece en el chat antes de pulsar /start)
+    # Mensaje de presentación / pantalla de inicio (Aparece en el chat de Telegram antes de pulsar Iniciar / /start)
     desc_es = (
-        "🌸 ¡Bienvenido/a a Bot-Bip!\n\n"
-        "Tu asistente personal de bienestar psicoafectivo.\n"
-        "Te ayudo a registrar de forma sencilla y sin presiones tu energía, humor, descanso y medicación diaria.\n\n"
-        "Presiona el botón 'Iniciar' o envía /start para comenzar tu acompañamiento."
+        "✨ ¡Hola! Bienvenido/a a Bot-Bip 💖\n\n"
+        "Tu espacio seguro para registrar tu estabilidad, ánimo y descanso.\n\n"
+        "🛡️ Comandos clave:\n"
+        "• /calma - Ejercicios & Red de Apoyo (llamadas/mensajes)\n"
+        "• /contacto - Añadir personas de confianza\n"
+        "• /recordatorio - Configurar la hora de tu aviso diario\n"
+        "• /dashboard - Panel de gráficos e informes privado"
     )
     desc_en = (
-        "🌸 Welcome to Bot-Bip!\n\n"
-        "Your personal psychoaffective wellness companion.\n"
-        "I help you effortlessly log your daily energy, mood, sleep, and medication without pressure.\n\n"
-        "Tap the 'Start' button or send /start to begin."
+        "✨ Hello! Welcome to Bot-Bip 💖\n\n"
+        "Your safe space to log your daily stability, mood, and sleep.\n\n"
+        "🛡️ Key commands:\n"
+        "• /calm - Exercises & Support Network (calls/messages)\n"
+        "• /contact - Add trusted people\n"
+        "• /reminder - Set daily notification time\n"
+        "• /dashboard - Private charts & report dashboard"
     )
     desc_fr = (
-        "🌸 Bienvenue sur Bot-Bip !\n\n"
-        "Votre assistant personnel de bien-être psycho-affectif.\n"
-        "Je vous aide à suivre simplement et sans pression votre énergie, humeur, sommeil et médication au quotidien.\n\n"
-        "Appuyez sur le bouton 'Démarrer' ou envoyez /start pour commencer."
+        "✨ Bonjour ! Bienvenue sur Bot-Bip 💖\n\n"
+        "Votre espace sécurisé pour suivre votre stabilité, humeur et sommeil.\n\n"
+        "🛡️ Commandes clés :\n"
+        "• /calme - Exercices & Réseau de soutien (appels/messages)\n"
+        "• /contact - Ajouter des personnes de confiance\n"
+        "• /rappel - Configurer l'heure de rappel quotidien\n"
+        "• /dashboard - Tableau de bord privé & rapports"
     )
 
     await app.bot.set_my_description(desc_es, language_code="es")
