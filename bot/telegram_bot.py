@@ -829,50 +829,59 @@ COMMANDS_BY_LANG = {
 
 async def setup_bot_commands(app) -> None:
     """Configura los comandos visibles en el menú flotante y el mensaje de presentación/descripción antes de pulsar Start para ES, EN y FR."""
-    # Comandos del menú
-    await app.bot.set_my_commands(COMMANDS_BY_LANG["es"])
-    await app.bot.set_my_commands(COMMANDS_BY_LANG["es"], language_code="es")
-    await app.bot.set_my_commands(COMMANDS_BY_LANG["en"], language_code="en")
-    await app.bot.set_my_commands(COMMANDS_BY_LANG["fr"], language_code="fr")
+    try:
+        # Comandos del menú
+        await app.bot.set_my_commands(COMMANDS_BY_LANG["es"])
+        await app.bot.set_my_commands(COMMANDS_BY_LANG["es"], language_code="es")
+        await app.bot.set_my_commands(COMMANDS_BY_LANG["en"], language_code="en")
+        await app.bot.set_my_commands(COMMANDS_BY_LANG["fr"], language_code="fr")
+    except Exception as e:
+        logger.warning(f"No se pudieron sincronizar los comandos en Telegram: {e}")
 
-    # Mensaje de descripción corta (Aparece bajo el nombre del bot en perfiles y búsquedas)
-    await app.bot.set_my_short_description("Asistente personal de seguimiento psicoafectivo y bienestar diario. 🌸", language_code="es")
-    await app.bot.set_my_short_description("Personal psychoaffective wellness & daily check-in assistant. 🌸", language_code="en")
-    await app.bot.set_my_short_description("Assistant personnel de suivi psycho-affectif et bien-être quotidien. 🌸", language_code="fr")
+    try:
+        # Mensaje de descripción corta
+        await app.bot.set_my_short_description("Asistente personal de seguimiento psicoafectivo y bienestar diario. 🌸", language_code="es")
+        await app.bot.set_my_short_description("Personal psychoaffective wellness & daily check-in assistant. 🌸", language_code="en")
+        await app.bot.set_my_short_description("Assistant personnel de suivi psycho-affectif et bien-être quotidien. 🌸", language_code="fr")
+    except Exception as e:
+        logger.warning(f"No se pudieron sincronizar las descripciones cortas en Telegram: {e}")
 
-    # Mensaje de presentación / pantalla de inicio (Aparece en el chat de Telegram antes de pulsar Iniciar / /start)
-    desc_es = (
-        "✨ ¡Hola! Bienvenido/a a Bot-Bip 💖\n\n"
-        "Tu espacio seguro para registrar tu estabilidad, ánimo y descanso.\n\n"
-        "🛡️ Comandos clave:\n"
-        "• /calma - Ejercicios & Red de Apoyo (llamadas/mensajes)\n"
-        "• /contacto - Añadir personas de confianza\n"
-        "• /recordatorio - Configurar la hora de tu aviso diario\n"
-        "• /dashboard - Panel de gráficos e informes privado"
-    )
-    desc_en = (
-        "✨ Hello! Welcome to Bot-Bip 💖\n\n"
-        "Your safe space to log your daily stability, mood, and sleep.\n\n"
-        "🛡️ Key commands:\n"
-        "• /calm - Exercises & Support Network (calls/messages)\n"
-        "• /contact - Add trusted people\n"
-        "• /reminder - Set daily notification time\n"
-        "• /dashboard - Private charts & report dashboard"
-    )
-    desc_fr = (
-        "✨ Bonjour ! Bienvenue sur Bot-Bip 💖\n\n"
-        "Votre espace sécurisé pour suivre votre stabilité, humeur et sommeil.\n\n"
-        "🛡️ Commandes clés :\n"
-        "• /calme - Exercices & Réseau de soutien (appels/messages)\n"
-        "• /contact - Ajouter des personnes de confiance\n"
-        "• /rappel - Configurer l'heure de rappel quotidien\n"
-        "• /dashboard - Tableau de bord privé & rapports"
-    )
+    try:
+        # Mensaje de presentación / pantalla de inicio (Aparece en el chat de Telegram antes de pulsar Iniciar / /start)
+        desc_es = (
+            "✨ ¡Hola! Bienvenido/a a Bot-Bip 💖\n\n"
+            "Tu espacio seguro para registrar tu estabilidad, ánimo y descanso.\n\n"
+            "🛡️ Comandos clave:\n"
+            "• /calma - Ejercicios & Red de Apoyo (llamadas/mensajes)\n"
+            "• /contacto - Añadir personas de confianza\n"
+            "• /recordatorio - Configurar la hora de tu aviso diario\n"
+            "• /dashboard - Panel de gráficos e informes privado"
+        )
+        desc_en = (
+            "✨ Hello! Welcome to Bot-Bip 💖\n\n"
+            "Your safe space to log your daily stability, mood, and sleep.\n\n"
+            "🛡️ Key commands:\n"
+            "• /calm - Exercises & Support Network (calls/messages)\n"
+            "• /contact - Add trusted people\n"
+            "• /reminder - Set daily notification time\n"
+            "• /dashboard - Private charts & report dashboard"
+        )
+        desc_fr = (
+            "✨ Bonjour ! Bienvenue sur Bot-Bip 💖\n\n"
+            "Votre espace sécurisé pour suivre votre stabilité, humeur et sommeil.\n\n"
+            "🛡️ Commandes clés :\n"
+            "• /calme - Exercices & Réseau de soutien (appels/messages)\n"
+            "• /contact - Ajouter des personnes de confiance\n"
+            "• /rappel - Configurer l'heure de rappel quotidien\n"
+            "• /dashboard - Tableau de bord privé & rapports"
+        )
 
-    await app.bot.set_my_description(desc_es)
-    await app.bot.set_my_description(desc_es, language_code="es")
-    await app.bot.set_my_description(desc_en, language_code="en")
-    await app.bot.set_my_description(desc_fr, language_code="fr")
+        await app.bot.set_my_description(desc_es)
+        await app.bot.set_my_description(desc_es, language_code="es")
+        await app.bot.set_my_description(desc_en, language_code="en")
+        await app.bot.set_my_description(desc_fr, language_code="fr")
+    except Exception as e:
+        logger.warning(f"No se pudieron sincronizar las descripciones principales en Telegram: {e}")
 
 
 def main():
