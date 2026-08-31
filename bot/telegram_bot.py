@@ -828,11 +828,41 @@ COMMANDS_BY_LANG = {
 
 
 async def setup_bot_commands(app) -> None:
-    """Configura los comandos visibles en el menú flotante de Telegram para todos los idiomas."""
+    """Configura los comandos visibles en el menú flotante y el mensaje de presentación/descripción antes de pulsar Start para ES, EN y FR."""
+    # Comandos del menú
     await app.bot.set_my_commands(COMMANDS_BY_LANG["es"])
     await app.bot.set_my_commands(COMMANDS_BY_LANG["es"], language_code="es")
     await app.bot.set_my_commands(COMMANDS_BY_LANG["en"], language_code="en")
     await app.bot.set_my_commands(COMMANDS_BY_LANG["fr"], language_code="fr")
+
+    # Mensaje de descripción corta (Aparece bajo el nombre del bot en perfiles y búsquedas)
+    await app.bot.set_my_short_description("Asistente personal de seguimiento psicoafectivo y bienestar diario. 🌸", language_code="es")
+    await app.bot.set_my_short_description("Personal psychoaffective wellness & daily check-in assistant. 🌸", language_code="en")
+    await app.bot.set_my_short_description("Assistant personnel de suivi psycho-affectif et bien-être quotidien. 🌸", language_code="fr")
+
+    # Mensaje de presentación / pantalla de inicio (Aparece en el chat antes de pulsar /start)
+    desc_es = (
+        "🌸 ¡Bienvenido/a a Bot-Bip!\n\n"
+        "Tu asistente personal de bienestar psicoafectivo.\n"
+        "Te ayudo a registrar de forma sencilla y sin presiones tu energía, humor, descanso y medicación diaria.\n\n"
+        "Presiona el botón 'Iniciar' o envía /start para comenzar tu acompañamiento."
+    )
+    desc_en = (
+        "🌸 Welcome to Bot-Bip!\n\n"
+        "Your personal psychoaffective wellness companion.\n"
+        "I help you effortlessly log your daily energy, mood, sleep, and medication without pressure.\n\n"
+        "Tap the 'Start' button or send /start to begin."
+    )
+    desc_fr = (
+        "🌸 Bienvenue sur Bot-Bip !\n\n"
+        "Votre assistant personnel de bien-être psycho-affectif.\n"
+        "Je vous aide à suivre simplement et sans pression votre énergie, humeur, sommeil et médication au quotidien.\n\n"
+        "Appuyez sur le bouton 'Démarrer' ou envoyez /start pour commencer."
+    )
+
+    await app.bot.set_my_description(desc_es, language_code="es")
+    await app.bot.set_my_description(desc_en, language_code="en")
+    await app.bot.set_my_description(desc_fr, language_code="fr")
 
 
 def main():

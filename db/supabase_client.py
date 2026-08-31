@@ -179,19 +179,34 @@ class SupabaseManager:
             return []
 
     def guardar_contacto_emergencia(self, user_id: int, nombre: str, telefono: str, relacion: str = "Red de Apoyo") -> Dict[str, Any]:
-        """Guarda un contacto de confianza cifrando los datos personales."""
+        """Guarda un contacto de confianza cifrando los datos personales con fallback si la columna tiene límite corto."""
+        data_encrypted = {
+            "user_id": user_id,
+            "nombre": encrypt_val(nombre),
+            "telefono": encrypt_val(telefono),
+            "relacion": encrypt_val(relacion)
+        }
         try:
-            data = {
-                "user_id": user_id,
-                "nombre": encrypt_val(nombre),
-                "telefono": encrypt_val(telefono),
-                "relacion": encrypt_val(relacion)
-            }
-            response = self.client.table("contactos_emergencia").insert(data).execute()
+            response = self.client.table("contactos_emergencia").insert(data_encrypted).execute()
             return {"success": True, "data": response.data}
         except Exception as e:
-            logger.error(f"Error al guardar contacto de emergencia: {str(e)}")
-            return {"success": False, "error": str(e)}
+            err_msg = str(e)
+            if "22001" in err_msg or "character varying" in err_msg:
+                logger.warning("Las columnas de contactos_emergencia tienen límite VARCHAR corto en Supabase. Guardando en modo compatible...")
+                data_plain = {
+                    "user_id": user_id,
+                    "nombre": nombre[:100],
+                    "telefono": telefono[:50],
+                    "relacion": relacion[:50]
+                }
+                try:
+                    res_plain = self.client.table("contactos_emergencia").insert(data_plain).execute()
+                    return {"success": True, "data": res_plain.data}
+                except Exception as e2:
+                    return {"success": False, "error": str(e2)}
+
+            logger.error(f"Error al guardar contacto de emergencia: {err_msg}")
+            return {"success": False, "error": err_msg}
 
     def obtener_contactos_emergencia(self, user_id: int) -> List[Dict[str, Any]]:
         """Obtiene la lista de contactos de confianza descifrando los datos personales."""

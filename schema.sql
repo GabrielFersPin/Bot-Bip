@@ -84,9 +84,9 @@ WITH CHECK (user_id IS NOT NULL);
 CREATE TABLE IF NOT EXISTS public.contactos_emergencia (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id BIGINT NOT NULL,                           -- ID de usuario de Telegram
-    nombre VARCHAR(100) NOT NULL,                      -- Nombre del contacto (ej: "Gabriel", "Mamá", "Dr. Ramos")
-    telefono VARCHAR(50) NOT NULL,                     -- Teléfono (ej: +34600000000)
-    relacion VARCHAR(50) DEFAULT 'Red de Apoyo',       -- Relación (ej: Pareja, Familiar, Terapeuta)
+    nombre TEXT NOT NULL,                              -- Nombre del contacto cifrado
+    telefono TEXT NOT NULL,                            -- Teléfono cifrado
+    relacion TEXT DEFAULT 'Red de Apoyo',              -- Relación cifrada
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

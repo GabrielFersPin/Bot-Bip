@@ -2,7 +2,7 @@
 
 STRINGS = {
     # Start & Welcome
-    "welcome_start": "🌸 **Hello! Welcome to Bot-Bip.**\n\nYour personal psychoaffective wellness companion. I am here to help you effortlessly log your energy, mood, sleep, and daily medication without any pressure.\n\nUse `/registrar` for your first check-in or `/ayuda` to view all commands.",
+    "welcome_start": "🌸 **Hello! Welcome to Bot-Bip.**\n\nYour personal psychoaffective wellness companion. I am here to help you effortlessly log your energy, mood, sleep, and daily medication without any pressure.\n\nUse `/log` (`/registrar`) for your first check-in or `/help` (`/ayuda`) to view all commands.",
     "btn_register_now": "📝 Check-in Now",
     
     # Check-in Flow
@@ -16,7 +16,7 @@ STRINGS = {
     "medication_saved": "✅ Medication status saved: **{val}**",
     "comments_title": "📝 **Would you like to add any notes or observations?**\n*(E.g., 'Stressful day at work', 'Walk in the park', or tap Skip)*",
     "btn_skip": "⏭️ Skip",
-    "record_completed": "✨ **Daily Check-in Completed!** 🎉\n\nThank you for taking this moment for self-care. Your data has been securely saved.\n\nYou can check your progress with `/resumen_semanal` or download your clinical PDF report with `/informe`.",
+    "record_completed": "✨ **Daily Check-in Completed!** 🎉\n\nThank you for taking this moment for self-care. Your data has been securely saved.\n\nYou can check your progress with `/weekly` (`/resumen_semanal`) or download your clinical PDF report with `/report` (`/informe`).",
 
     # Medication Keyboards
     "med_si": "✅ Yes, taken",

@@ -2,7 +2,7 @@
 
 STRINGS = {
     # Start & Welcome
-    "welcome_start": "🌸 **Bonjour ! Bienvenue sur Bot-Bip.**\n\nVotre assistant personnel de bien-être psycho-affectif. Je suis là pour vous accompagner simplement et sans pression dans le suivi quotidien de votre énergie, humeur, sommeil et médication.\n\nUtilisez `/registrar` pour votre premier suivi ou `/ayuda` pour voir toutes les commandes.",
+    "welcome_start": "🌸 **Bonjour ! Bienvenue sur Bot-Bip.**\n\nVotre assistant personnel de bien-être psycho-affectif. Je suis là pour vous accompagner simplement et sans pression dans le suivi quotidien de votre énergie, humeur, sommeil et médication.\n\nUtilisez `/enregistrer` (`/registrar`) pour votre premier suivi ou `/aide` (`/ayuda`) pour voir toutes les commandes.",
     "btn_register_now": "📝 Faire le suivi maintenant",
     
     # Check-in Flow
@@ -16,7 +16,7 @@ STRINGS = {
     "medication_saved": "✅ Statut du traitement enregistré : **{val}**",
     "comments_title": "📝 **Souhaitez-vous ajouter des remarques ou observations ?**\n*(Ex : 'Journée stressante', 'Promenade au parc', ou appuyez sur Ignorer)*",
     "btn_skip": "⏭️ Ignorer",
-    "record_completed": "✨ **Suivi quotidien terminé !** 🎉\n\nMerci d'avoir pris ce moment pour prendre soin de vous. Vos données ont été enregistrées en toute sécurité.\n\nVous pouvez consulter votre évolution avec `/resumen_semanal` ou télécharger votre rapport médical en PDF avec `/informe`.",
+    "record_completed": "✨ **Suivi quotidien terminé !** 🎉\n\nMerci d'avoir pris ce moment pour prendre soin de vous. Vos données ont été enregistrées en toute sécurité.\n\nVous pouvez consulter votre évolution avec `/resume_hebdo` (`/resumen_semanal`) ou télécharger votre rapport médical en PDF avec `/rapport` (`/informe`).",
 
     # Medication Keyboards
     "med_si": "✅ Oui, pris",
