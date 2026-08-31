@@ -31,8 +31,8 @@ STRINGS = {
     "calma_btn_msg": "💬 Message {nombre}",
 
     # Contact
-    "contacto_usage": "⚠️ **Correct usage:** `/contacto Name Phone [Relationship]`\nExample: `/contacto Gabriel +34600000000 Partner`",
-    "contacto_saved": "✅ **Contact saved successfully:**\n• **Name:** {nombre}\n• **Phone:** {telefono}\n• **Relationship:** {relacion}",
+    "contacto_usage": "⚠️ **Format to add a contact:**\n`/contact Name Phone [Relationship]`\n\nExample:\n`/contact Gabriel +34600000000 Partner`\n`/contact Dr.Ramos +34611111111 Therapist`",
+    "contacto_saved": "✅ **Contact added to your Support Network:**\n👤 **Name:** {nombre}\n📞 **Phone:** `{telefono}`\n🏷️ **Relationship:** {relacion}\n\nNow it will appear with call & message buttons when using `/calm`.",
 
     # Reminder & Rescue
     "reminder_msg": "🔔 **Hello! It's time for your daily wellness check-in.**\n\nTap the button below or send /registrar to answer your quick questions.",
@@ -70,5 +70,5 @@ STRINGS = {
     "reminder_disabled": "🔕 Daily reminder turned off.",
 
     # Help
-    "help_text": "🤖 **Bot-Bip - Support & Check-in Commands**\n\n• `/registrar` - Daily check-in (Energy, Mood, Sleep & Medication).\n• `/informe` - Receive your **Clinical PDF Report** directly in chat.\n• `/resumen_semanal` - View your 7-day stability averages.\n• `/dashboard` - Open your full browser interactive dashboard.\n• `/calma` - Relaxation space and quick call/message buttons for your **Support Network**.\n• `/contacto` - Add a trusted contact person.\n• `/recordatorio` - Set your daily notification time.\n• `/idioma` - Change language (Spanish, English, French).\n• `/cancelar` - Cancel the current check-in.\n• `/ayuda` - Show this help message."
+    "help_text": "🤖 **Bot-Bip - Support & Check-in Commands**\n\n• `/log` (`/registrar`) - Daily check-in (Energy, Mood, Sleep & Medication).\n• `/report` (`/informe`) - Receive your **Clinical PDF Report** directly in chat.\n• `/weekly` (`/resumen_semanal`) - View your 7-day stability averages.\n• `/dashboard` - Open your full browser interactive dashboard.\n• `/calm` (`/calma`) - Relaxation space and quick call/message buttons for your **Support Network**.\n• `/contact` (`/contacto`) - Add a trusted contact person.\n• `/reminder` (`/recordatorio`) - Set your daily notification time.\n• `/language` (`/idioma`) - Change language (Spanish, English, French).\n• `/cancel` (`/cancelar`) - Cancel the current check-in.\n• `/help` (`/ayuda`) - Show this help message."
 }

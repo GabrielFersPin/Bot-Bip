@@ -31,8 +31,8 @@ STRINGS = {
     "calma_btn_msg": "💬 Envoyer un message à {nombre}",
 
     # Contact
-    "contacto_usage": "⚠️ **Utilisation correcte :** `/contacto Nom Telephone [Relation]`\nExemple : `/contacto Gabriel +34600000000 Partenaire`",
-    "contacto_saved": "✅ **Contact enregistré avec succès :**\n• **Nom :** {nombre}\n• **Téléphone :** {telefono}\n• **Relation :** {relacion}",
+    "contacto_usage": "⚠️ **Format pour ajouter un contact :**\n`/contact Nom Telephone [Relation]`\n\nExemple :\n`/contact Gabriel +34600000000 Partenaire`\n`/contact Dr.Ramos +34611111111 Thérapeute`",
+    "contacto_saved": "✅ **Contact ajouté à votre Réseau de Soutien :**\n👤 **Nom :** {nombre}\n📞 **Téléphone :** `{telefono}`\n🏷️ **Relation :** {relacion}\n\nIl apparaîtra désormais avec des boutons d'appel et de message lors de l'utilisation de `/calme`.",
 
     # Reminder & Rescue
     "reminder_msg": "🔔 **Bonjour ! C'est l'heure de votre suivi quotidien de bien-être.**\n\nAppuyez sur le bouton ci-dessous ou envoyez /registrar pour répondre aux questions rapides.",
@@ -70,5 +70,5 @@ STRINGS = {
     "reminder_disabled": "🔕 Rappel quotidien désactivé.",
 
     # Help
-    "help_text": "🤖 **Bot-Bip - Commandes de soutien et de suivi**\n\n• `/registrar` - Suivi quotidien (Énergie, Humeur, Sommeil & Médication).\n• `/informe` - Recevoir votre **Rapport Clinique PDF** directement dans le chat.\n• `/resumen_semanal` - Voir vos moyennes de stabilité sur 7 jours.\n• `/dashboard` - Ouvrir votre tableau de bord interactif dans le navigateur.\n• `/calma` - Espace de relaxation et boutons d'appel/message rapide vers votre **Réseau de soutien**.\n• `/contacto` - Ajouter une personne de confiance.\n• `/recordatorio` - Configurer l'heure de votre notification quotidienne.\n• `/idioma` - Changer de langue (Espagnol, Anglais, Français).\n• `/cancelar` - Annuler le suivi en cours.\n• `/ayuda` - Afficher ce message d'aide."
+    "help_text": "🤖 **Bot-Bip - Commandes de soutien et de suivi**\n\n• `/enregistrer` (`/registrar`) - Suivi quotidien (Énergie, Humeur, Sommeil & Médication).\n• `/rapport` (`/informe`) - Recevoir votre **Rapport Clinique PDF** directement dans le chat.\n• `/resume_hebdo` (`/resumen_semanal`) - Voir vos moyennes de stabilité sur 7 jours.\n• `/tableaudebord` (`/dashboard`) - Ouvrir votre tableau de bord interactif dans le navigateur.\n• `/calme` (`/calma`) - Espace de relaxation et boutons d'appel/message rapide vers votre **Réseau de soutien**.\n• `/contact` (`/contacto`) - Ajouter une personne de confiance.\n• `/rappel` (`/recordatorio`) - Configurer l'heure de votre notification quotidienne.\n• `/langue` (`/idioma`) - Changer de langue (Espagnol, Anglais, Français).\n• `/annuler` (`/cancelar`) - Annuler le suivi en cours.\n• `/aide` (`/ayuda`) - Afficher ce message d'aide."
 }

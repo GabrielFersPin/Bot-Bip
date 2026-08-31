@@ -565,11 +565,17 @@ async def energia_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 # AGENTE DE RECORDATORIOS (JobQueue)
 # ==============================================================================
 
-def get_horarios_keyboard() -> InlineKeyboardMarkup:
-    """Genera botones interactivos con opciones comunes de horario diario."""
+def get_horarios_keyboard(lang: str = "es") -> InlineKeyboardMarkup:
+    """Genera botones interactivos con opciones comunes de horario diario en el idioma del usuario."""
+    labels = {
+        "es": ("🌅 Mañana (09:00)", "☀️ Tarde (14:00)", "🌆 Noche (20:00)", "🌙 Antes de dormir (22:00)"),
+        "en": ("🌅 Morning (09:00)", "☀️ Afternoon (14:00)", "🌆 Evening (20:00)", "🌙 Before sleep (22:00)"),
+        "fr": ("🌅 Matin (09:00)", "☀️ Après-midi (14:00)", "🌆 Soir (20:00)", "🌙 Avant de dormir (22:00)")
+    }
+    l = labels.get(lang, labels["es"])
     keyboard = [
-        [InlineKeyboardButton("🌅 Mañana (09:00)", callback_data="set_hora_09:00"), InlineKeyboardButton("☀️ Tarde (14:00)", callback_data="set_hora_14:00")],
-        [InlineKeyboardButton("🌆 Noche (20:00)", callback_data="set_hora_20:00"), InlineKeyboardButton("🌙 Antes de dormir (22:00)", callback_data="set_hora_22:00")]
+        [InlineKeyboardButton(l[0], callback_data="set_hora_09:00"), InlineKeyboardButton(l[1], callback_data="set_hora_14:00")],
+        [InlineKeyboardButton(l[2], callback_data="set_hora_20:00"), InlineKeyboardButton(l[3], callback_data="set_hora_22:00")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -689,7 +695,7 @@ async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT
     await update.message.reply_text(
         t("reminder_config_title", lang),
         parse_mode="Markdown",
-        reply_markup=get_horarios_keyboard()
+        reply_markup=get_horarios_keyboard(lang)
     )
 
 
