@@ -670,11 +670,19 @@ async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT
     """Permite elegir interactivamente la hora del recordatorio o enviarla por texto."""
     chat_id = update.effective_chat.id
 
+    lang = get_user_language(update, context)
     # Si pasa un argumento directamente (ej: /recordatorio 21:30)
     if context.args:
         try:
             hora_str = context.args[0]
             time_obj = datetime.strptime(hora_str, "%H:%M").time()
+
+            try:
+                import zoneinfo
+                tz = zoneinfo.ZoneInfo("Europe/Madrid")
+            except Exception:
+                import pytz
+                tz = pytz.timezone("Europe/Madrid")
 
             current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
             for job in current_jobs:
@@ -682,13 +690,13 @@ async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT
 
             context.job_queue.run_daily(
                 enviar_recordatorio_job,
-                time=time_obj,
+                time=time_obj.replace(tzinfo=tz),
                 chat_id=chat_id,
                 name=str(chat_id)
             )
 
             await update.message.reply_text(
-                f"⏰ **Recordatorio programado diariamente a las {hora_str}hs.**",
+                t("reminder_configured", lang).format(hora=f"{hora_str}hs"),
                 parse_mode="Markdown"
             )
             return
@@ -697,9 +705,7 @@ async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT
 
     # Si no especifica hora, ofrecer botones para elegir fácilmente
     await update.message.reply_text(
-        "⏰ **Configuración de Recordatorio Diario**\n\n"
-        "Elige la hora que mejor se adapte a tu rutina para recibir tu notificación diaria automática:\n"
-        "*(O escribe `/recordatorio HH:MM` con tu hora personalizada)*",
+        t("reminder_config_title", lang),
         parse_mode="Markdown",
         reply_markup=get_horarios_keyboard()
     )
@@ -709,6 +715,8 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
     """Maneja el clic en los botones de selección de horario."""
     query = update.callback_query
     await query.answer()
+
+    lang = get_user_language(update, context)
 
     if query.data.startswith("set_hora_"):
         hora_str = query.data.replace("set_hora_", "")
@@ -737,9 +745,7 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
         )
 
         await query.edit_message_text(
-            f"✅ **¡Excelente! Recordatorio configurado.**\n\n"
-            f"Te enviaré una notificación diaria automática a las **{hora_str}hs** para realizar tu check-in.\n"
-            f"*(Puedes cambiar la hora cuando quieras con /recordatorio)*",
+            t("reminder_configured", lang).format(hora=f"{hora_str}hs"),
             parse_mode="Markdown"
         )
     elif query.data == "iniciar_registro_ahora":
