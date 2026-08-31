@@ -8,3 +8,4 @@ python-dotenv>=1.0.0
 statsmodels>=0.14.0
 starlette>=0.37.0,<0.40.0
 fpdf2>=2.7.0
+cryptography>=42.0.0
