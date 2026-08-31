@@ -503,6 +503,7 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     """Comando /cancelar - Cancela la conversación activa."""
     lang = get_user_language(update, context)
     context.user_data.clear()
+    context.user_data["lang"] = lang
     await update.message.reply_text(
         t("cancel_msg", lang),
         reply_markup=ReplyKeyboardRemove()
@@ -864,7 +865,7 @@ def main():
     app.add_handler(CommandHandler(["dashboard", "tableaudebord"], dashboard_command))
     app.add_handler(CommandHandler(["informe", "report", "rapport"], enviar_informe_pdf_command))
     app.add_handler(CommandHandler(["calma", "calm", "calme"], calma_command))
-    app.add_handler(CommandHandler(["contacto", "contact"], agregar_contacto_command))
+    app.add_handler(CommandHandler(["contacto", "contact"], contacto_command))
     app.add_handler(CommandHandler(["ayuda", "help", "aide"], help_command))
     app.add_handler(CommandHandler(["recordatorio", "reminder", "rappel"], set_recordatorio_command))
     app.add_handler(CommandHandler("recordatorio_off", remove_recordatorio_command))
