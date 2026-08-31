@@ -24,8 +24,8 @@ def resolve_lang_code(raw_code: str) -> str:
     code = str(raw_code).lower().strip()[:2]
     if code in LANG_MAP:
         return code
-    # Si es otro idioma desconocido (ej: alemán, italiano), usar inglés como lingua franca
-    return "en"
+    # Si es otro idioma desconocido, usar español por defecto
+    return "es"
 
 def t(key: str, lang: str = "es", **kwargs: Any) -> str:
     """
