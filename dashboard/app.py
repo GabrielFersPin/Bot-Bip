@@ -108,19 +108,6 @@ def init_db():
 
 db = init_db()
 
-# ==============================================================================
-# ENCABEZADO Y BARRA LATERAL (FILTROS)
-# ==============================================================================
-
-st.markdown(f"""
-<div class="dashboard-header">
-    <h1 class="dashboard-title">{t_dash['title']}</h1>
-    <p style="color: #94a3b8; margin-top: 8px; margin-bottom: 0;">
-        {t_dash['subtitle']}
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
 # Detección estricta de Telegram WebApp user_id y lang vía parámetros de URL (st.query_params)
 query_params = st.query_params
 telegram_user_id = query_params.get("user_id", None)
@@ -263,6 +250,19 @@ I18N_DASHBOARD = {
 }
 
 t_dash = I18N_DASHBOARD[lang_code]
+
+# ==============================================================================
+# ENCABEZADO Y BARRA LATERAL (FILTROS)
+# ==============================================================================
+
+st.markdown(f"""
+<div class="dashboard-header">
+    <h1 class="dashboard-title">{t_dash['title']}</h1>
+    <p style="color: #94a3b8; margin-top: 8px; margin-bottom: 0;">
+        {t_dash['subtitle']}
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 user_filter = None
 
