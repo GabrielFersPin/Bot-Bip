@@ -41,8 +41,8 @@ STRINGS = {
     "reminder_configured": "✅ **Parfait ! Rappel configuré.**\n\nJe vous enverrai une notification quotidienne automatique à **{hora}** pour effectuer votre suivi.\n*(Vous pouvez modifier l'heure à tout moment avec /recordatorio)*",
 
     # Weekly Digest
-    "weekly_no_data": "🌸 **Avis :** Pas assez d'enregistrements cette semaine. Commencez dès aujourd'hui avec `/registrar` !",
-    "weekly_digest_title": "🌸 **Votre bilan hebdomadaire de bien-être** 📊\n\n🗓️ **Jours enregistrés cette semaine :** {days}/7 jours\n⚡ **Énergie moyenne :** {energia:.1f}/10\n🎭 **Humeur moyenne :** {humor:.1f}/10\n💤 **Sommeil moyen :** {sueno:.1f}h/nuit\n\n✨ *Bravo pour votre régularité ! N'oubliez pas que vous pouvez télécharger votre rapport médical en PDF avec /informe.*",
+    "weekly_no_data": "🌸 **Avis :** Pas assez d'enregistrements cette semaine. Commencez dès aujourd'hui avec `/enregistrer` !",
+    "weekly_digest_title": "🌸 **Votre bilan hebdomadaire de bien-être** 📊\n\n🗓️ **Jours enregistrés cette semaine :** {days}/7 jours\n⚡ **Énergie moyenne :** {energia:.1f}/10\n🎭 **Humeur moyenne :** {humor:.1f}/10\n💤 **Sommeil moyen :** {sueno:.1f}h/nuit\n\n✨ *Bravo pour votre régularité ! N'oubliez pas que vous pouvez télécharger votre rapport médical en PDF avec /rapport.*",
 
     # Clinical PDF
     "pdf_generating": "📄 **Génération de votre rapport clinique PDF en cours...** Un instant s'il vous plaît...",

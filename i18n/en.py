@@ -41,8 +41,8 @@ STRINGS = {
     "reminder_configured": "✅ **Great! Reminder set.**\n\nI will send you an automatic daily notification at **{hora}** for your check-in.\n*(You can change the time whenever you want with /recordatorio)*",
 
     # Weekly Digest
-    "weekly_no_data": "🌸 **Notice:** Not enough entries saved this week. Start today with `/registrar`!",
-    "weekly_digest_title": "🌸 **Your Weekly Wellness Digest** 📊\n\n🗓️ **Days logged this week:** {days}/7 days\n⚡ **Average Energy:** {energia:.1f}/10\n🎭 **Average Mood:** {humor:.1f}/10\n💤 **Average Sleep:** {sueno:.1f}h/night\n\n✨ *Great job staying consistent! Remember you can download your clinical PDF report with /informe.*",
+    "weekly_no_data": "🌸 **Notice:** Not enough entries saved this week. Start today with `/log` (`/registrar`)!",
+    "weekly_digest_title": "🌸 **Your Weekly Wellness Digest** 📊\n\n🗓️ **Days logged this week:** {days}/7 days\n⚡ **Average Energy:** {energia:.1f}/10\n🎭 **Average Mood:** {humor:.1f}/10\n💤 **Average Sleep:** {sueno:.1f}h/night\n\n✨ *Great job staying consistent! Remember you can download your clinical PDF report with /report.*",
 
     # Clinical PDF
     "pdf_generating": "📄 **Generating your Clinical PDF Report...** One moment please...",
