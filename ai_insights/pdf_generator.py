@@ -205,12 +205,18 @@ def generar_pdf_clinico(df: pd.DataFrame, user_id: str = "Usuario", ai_summary: 
     pdf.set_font("Helvetica", "", 8.5)
     df_sorted = df.sort_values("fecha", ascending=False) if "fecha" in df.columns else df
 
+    try:
+        from db.supabase_client import decrypt_val
+    except Exception:
+        def decrypt_val(val): return val
+
     for _, row in df_sorted.iterrows():
         f_val = str(row.get("fecha", ""))[:10]
         e_val = f"{row.get('energia', '-')}/10"
         h_val = f"{row.get('humor', '-')}/10"
         s_val = f"{row.get('sueno_horas', '-')}h"
         raw_com = str(row.get("comentarios", "")) if pd.notna(row.get("comentarios")) else ""
+        raw_com = decrypt_val(raw_com)
 
         # Extraer medicación si está prefijada
         med_val = "-"
