@@ -699,8 +699,8 @@ async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT
                 data={"lang": lang}
             )
 
-            # Persistir configuración en Supabase
-            db.guardar_recordatorio_config(user_id=chat_id, hora=hora_str)
+            # Persistir configuración en Supabase con el idioma preferido
+            db.guardar_recordatorio_config(user_id=chat_id, hora=hora_str, lang=lang)
 
             await update.message.reply_text(
                 t("reminder_configured", lang).format(hora=f"{hora_str}hs"),
@@ -752,8 +752,8 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
             data={"lang": lang}
         )
 
-        # Persistir configuración en Supabase
-        db.guardar_recordatorio_config(user_id=chat_id, hora=hora_str)
+        # Persistir configuración en Supabase con el idioma preferido
+        db.guardar_recordatorio_config(user_id=chat_id, hora=hora_str, lang=lang)
 
         await query.edit_message_text(
             t("reminder_configured", lang).format(hora=f"{hora_str}hs"),
@@ -914,6 +914,7 @@ async def setup_bot_commands(app) -> None:
             for r in recordatorios:
                 chat_id = r.get("user_id")
                 hora_str = r.get("hora")
+                r_lang = r.get("lang", "es")
                 if chat_id and hora_str:
                     try:
                         time_obj = datetime.strptime(hora_str, "%H:%M").time()
@@ -927,7 +928,8 @@ async def setup_bot_commands(app) -> None:
                             enviar_recordatorio_job,
                             time=time_obj.replace(tzinfo=tz),
                             chat_id=chat_id,
-                            name=str(chat_id)
+                            name=str(chat_id),
+                            data={"lang": r_lang}
                         )
                         restaurados += 1
                     except Exception as err_job:

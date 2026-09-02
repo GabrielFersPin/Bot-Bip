@@ -225,20 +225,27 @@ class SupabaseManager:
             logger.error(f"Error al obtener contactos de emergencia: {str(e)}")
             return []
 
-    def guardar_recordatorio_config(self, user_id: int, hora: str, timezone: str = "Europe/Madrid") -> Dict[str, Any]:
-        """Guarda o actualiza la configuración de la hora del recordatorio de un usuario."""
+    def guardar_recordatorio_config(self, user_id: int, hora: str, lang: str = "es", timezone: str = "Europe/Madrid") -> Dict[str, Any]:
+        """Guarda o actualiza la configuración de la hora del recordatorio y su idioma preferido."""
         try:
             data = {
                 "user_id": user_id,
                 "hora": hora,
+                "lang": lang,
                 "timezone": timezone,
                 "activo": True
             }
             res = self.client.table("recordatorios_config").upsert(data, on_conflict="user_id").execute()
             return {"success": True, "data": res.data}
         except Exception as e:
-            logger.error(f"Error al guardar configuración de recordatorio para {user_id}: {e}")
-            return {"success": False, "error": str(e)}
+            # Fallback por si la columna 'lang' aún no existe en Supabase
+            try:
+                data_legacy = {"user_id": user_id, "hora": hora, "timezone": timezone, "activo": True}
+                res_legacy = self.client.table("recordatorios_config").upsert(data_legacy, on_conflict="user_id").execute()
+                return {"success": True, "data": res_legacy.data}
+            except Exception as e2:
+                logger.error(f"Error al guardar configuración de recordatorio para {user_id}: {e2}")
+                return {"success": False, "error": str(e2)}
 
     def eliminar_recordatorio_config(self, user_id: int) -> bool:
         """Desactiva o elimina la configuración del recordatorio."""
