@@ -103,3 +103,30 @@ ON public.contactos_emergencia
 FOR SELECT
 TO anon, authenticated
 USING (true);
+
+-- ==============================================================================
+-- Tabla: recordatorios_config (Configuración de hora de aviso diario por usuario)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.recordatorios_config (
+    user_id BIGINT PRIMARY KEY,                        -- ID de usuario / chat de Telegram
+    hora TEXT NOT NULL,                                -- Hora programada HH:MM (ej: "09:00")
+    timezone TEXT DEFAULT 'Europe/Madrid',             # Zona horaria del usuario
+    activo BOOLEAN DEFAULT TRUE,                        # Estado de la alarma
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.recordatorios_config ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Permitir lectura de recordatorios"
+ON public.recordatorios_config
+FOR SELECT
+TO anon, authenticated
+USING (true);
+
+CREATE POLICY "Permitir insercion/actualizacion de recordatorios"
+ON public.recordatorios_config
+FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+

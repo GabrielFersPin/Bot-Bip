@@ -696,6 +696,9 @@ async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT
                 name=str(chat_id)
             )
 
+            # Persistir configuración en Supabase
+            db.guardar_recordatorio_config(user_id=chat_id, hora=hora_str)
+
             await update.message.reply_text(
                 t("reminder_configured", lang).format(hora=f"{hora_str}hs"),
                 parse_mode="Markdown"
@@ -745,6 +748,9 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
             name=str(chat_id)
         )
 
+        # Persistir configuración en Supabase
+        db.guardar_recordatorio_config(user_id=chat_id, hora=hora_str)
+
         await query.edit_message_text(
             t("reminder_configured", lang).format(hora=f"{hora_str}hs"),
             parse_mode="Markdown"
@@ -761,6 +767,11 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
 
 async def remove_recordatorio_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     lang = get_user_language(update, context)
+    chat_id = update.effective_chat.id
+    current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
+    for job in current_jobs:
+        job.schedule_removal()
+    db.eliminar_recordatorio_config(user_id=chat_id)
     await update.message.reply_text(t("reminder_disabled", lang))
 
 
@@ -882,6 +893,45 @@ async def setup_bot_commands(app) -> None:
         await app.bot.set_my_description(desc_fr, language_code="fr")
     except Exception as e:
         logger.warning(f"No se pudieron sincronizar las descripciones principales en Telegram: {e}")
+
+    # Restaurar alarmas activas desde Supabase al iniciar el bot
+    try:
+        if app.job_queue:
+            recordatorios = db.obtener_todos_recordatorios_activos()
+            restaurados = 0
+            
+            try:
+                import zoneinfo
+                tz = zoneinfo.ZoneInfo("Europe/Madrid")
+            except Exception:
+                import pytz
+                tz = pytz.timezone("Europe/Madrid")
+
+            for r in recordatorios:
+                chat_id = r.get("user_id")
+                hora_str = r.get("hora")
+                if chat_id and hora_str:
+                    try:
+                        time_obj = datetime.strptime(hora_str, "%H:%M").time()
+                        
+                        # Limpiar previas si existieran
+                        current_jobs = app.job_queue.get_jobs_by_name(str(chat_id))
+                        for job in current_jobs:
+                            job.schedule_removal()
+
+                        app.job_queue.run_daily(
+                            enviar_recordatorio_job,
+                            time=time_obj.replace(tzinfo=tz),
+                            chat_id=chat_id,
+                            name=str(chat_id)
+                        )
+                        restaurados += 1
+                    except Exception as err_job:
+                        logger.error(f"Error restaurando recordatorio para {chat_id}: {err_job}")
+
+            logger.info(f"⏰ Se restauraron {restaurados} recordatorios diarios activos desde Supabase.")
+    except Exception as e:
+        logger.error(f"Error al restaurar los recordatorios guardados: {e}")
 
 
 def main():

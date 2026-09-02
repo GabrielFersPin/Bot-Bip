@@ -225,6 +225,40 @@ class SupabaseManager:
             logger.error(f"Error al obtener contactos de emergencia: {str(e)}")
             return []
 
+    def guardar_recordatorio_config(self, user_id: int, hora: str, timezone: str = "Europe/Madrid") -> Dict[str, Any]:
+        """Guarda o actualiza la configuración de la hora del recordatorio de un usuario."""
+        try:
+            data = {
+                "user_id": user_id,
+                "hora": hora,
+                "timezone": timezone,
+                "activo": True
+            }
+            res = self.client.table("recordatorios_config").upsert(data, on_conflict="user_id").execute()
+            return {"success": True, "data": res.data}
+        except Exception as e:
+            logger.error(f"Error al guardar configuración de recordatorio para {user_id}: {e}")
+            return {"success": False, "error": str(e)}
+
+    def eliminar_recordatorio_config(self, user_id: int) -> bool:
+        """Desactiva o elimina la configuración del recordatorio."""
+        try:
+            self.client.table("recordatorios_config").update({"activo": False}).eq("user_id", user_id).execute()
+            return True
+        except Exception as e:
+            logger.error(f"Error al desactivar recordatorio para {user_id}: {e}")
+            return False
+
+    def obtener_todos_recordatorios_activos(self) -> List[Dict[str, Any]]:
+        """Obtiene la lista de todos los recordatorios activos para restaurar alarmas en inicio."""
+        try:
+            res = self.client.table("recordatorios_config").select("*").eq("activo", True).execute()
+            return res.data or []
+        except Exception as e:
+            logger.error(f"Error al obtener recordatorios activos: {e}")
+            return []
+
+
 
 # Instancia por defecto para importar fácilmente
 def get_db_client(use_service_role: bool = False) -> SupabaseManager:

@@ -35,10 +35,10 @@ STRINGS = {
     "contacto_saved": "✅ **Contact added to your Support Network:**\n👤 **Name:** {nombre}\n📞 **Phone:** `{telefono}`\n🏷️ **Relationship:** {relacion}\n\nNow it will appear with call & message buttons when using `/calm`.",
 
     # Reminder & Rescue
-    "reminder_msg": "🔔 **Hello! It's time for your daily wellness check-in.**\n\nTap the button below or send /registrar to answer your quick questions.",
+    "reminder_msg": "🔔 **Hello! It's time for your daily wellness check-in.**\n\nTap the button below or send /log to answer your quick questions.",
     "rescue_notification": "💙 **Support & Care Notification:**\n\nHello, we noticed it has been {dias} days without wellness logs from {user_name}.\nDuring low or exhausting times, taking a pause is completely normal. It might be a great moment to send a warm message, call, or hug without any pressure. 🌸",
     "reminder_config_title": "⏰ **Daily Reminder Configuration**\n\nSelect the time you prefer to receive your daily notification:",
-    "reminder_configured": "✅ **Great! Reminder set.**\n\nI will send you an automatic daily notification at **{hora}** for your check-in.\n*(You can change the time whenever you want with /recordatorio)*",
+    "reminder_configured": "✅ **Great! Reminder set.**\n\nI will send you an automatic daily notification at **{hora}** for your check-in.\n*(You can change the time whenever you want with /reminder)*",
 
     # Weekly Digest
     "weekly_no_data": "🌸 **Notice:** Not enough entries saved this week. Start today with `/log` (`/registrar`)!",

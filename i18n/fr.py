@@ -35,10 +35,10 @@ STRINGS = {
     "contacto_saved": "✅ **Contact ajouté à votre Réseau de Soutien :**\n👤 **Nom :** {nombre}\n📞 **Téléphone :** `{telefono}`\n🏷️ **Relation :** {relacion}\n\nIl apparaîtra désormais avec des boutons d'appel et de message lors de l'utilisation de `/calme`.",
 
     # Reminder & Rescue
-    "reminder_msg": "🔔 **Bonjour ! C'est l'heure de votre suivi quotidien de bien-être.**\n\nAppuyez sur le bouton ci-dessous ou envoyez /registrar pour répondre aux questions rapides.",
+    "reminder_msg": "🔔 **Bonjour ! C'est l'heure de votre suivi quotidien de bien-être.**\n\nAppuyez sur le bouton ci-dessous ou envoyez /enregistrer pour répondre aux questions rapides.",
     "rescue_notification": "💙 **Notification d'accompagnement et de soutien :**\n\nBonjour, nous avons remarqué que cela fait {dias} jours sans enregistrement de bien-être de {user_name}.\nDans les moments de fatigue ou de baisse de moral, faire une pause est tout à fait normal. Ce serait peut-être le bon moment pour envoyer un message chaleureux ou passer un appel sans pression. 🌸",
     "reminder_config_title": "⏰ **Configuration du rappel quotidien**\n\nSélectionnez l'heure à laquelle vous préférez recevoir votre notification quotidienne :",
-    "reminder_configured": "✅ **Parfait ! Rappel configuré.**\n\nJe vous enverrai une notification quotidienne automatique à **{hora}** pour effectuer votre suivi.\n*(Vous pouvez modifier l'heure à tout moment avec /recordatorio)*",
+    "reminder_configured": "✅ **Parfait ! Rappel configuré.**\n\nJe vous enverrai une notification quotidienne automatique à **{hora}** pour effectuer votre suivi.\n*(Vous pouvez modifier l'heure à tout moment avec /rappel)*",
 
     # Weekly Digest
     "weekly_no_data": "🌸 **Avis :** Pas assez d'enregistrements cette semaine. Commencez dès aujourd'hui avec `/enregistrer` !",
