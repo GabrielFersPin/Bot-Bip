@@ -599,10 +599,12 @@ async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = job.chat_id
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-    # Intentar obtener idioma del job o usar fallback
+    # Intentar obtener idioma preferido del usuario (de job.data o context.user_data)
     lang = "es"
     if isinstance(job.data, dict) and "lang" in job.data:
         lang = job.data["lang"]
+    elif context.user_data and "user_lang" in context.user_data:
+        lang = context.user_data["user_lang"]
 
     btn = InlineKeyboardMarkup([[InlineKeyboardButton(t("btn_register_now", lang), callback_data="iniciar_registro_ahora")]])
     await context.bot.send_message(
@@ -693,7 +695,8 @@ async def set_recordatorio_command(update: Update, context: ContextTypes.DEFAULT
                 enviar_recordatorio_job,
                 time=time_obj.replace(tzinfo=tz),
                 chat_id=chat_id,
-                name=str(chat_id)
+                name=str(chat_id),
+                data={"lang": lang}
             )
 
             # Persistir configuración en Supabase
@@ -745,7 +748,8 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
             enviar_recordatorio_job,
             time=time_obj.replace(tzinfo=tz),
             chat_id=chat_id,
-            name=str(chat_id)
+            name=str(chat_id),
+            data={"lang": lang}
         )
 
         # Persistir configuración en Supabase
