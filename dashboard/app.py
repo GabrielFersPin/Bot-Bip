@@ -314,7 +314,7 @@ def fetch_data(user_id=None, start_str=None, end_str=None):
     df = pd.DataFrame(registros)
     if "comentarios" in df.columns:
         from db.supabase_client import decrypt_val
-        df["comentarios"] = df["comentarios"].apply(lambda x: decrypt_val(x) if isinstance(x, str) else x)
+        df["comentarios"] = df["comentarios"].astype(str).apply(decrypt_val)
 
     if "created_at" in df.columns:
         df["created_at_dt"] = pd.to_datetime(df["created_at"])
