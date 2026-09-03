@@ -125,6 +125,7 @@ async def contacto_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 async def humor_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Procesa la respuesta de HUMOR e inicia la pregunta de SUEÑO."""
+    lang = get_user_language(update, context)
     val = None
     if update.callback_query:
         await update.callback_query.answer()
@@ -137,7 +138,7 @@ async def humor_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             val = int(text)
 
     if val is None or not (1 <= val <= 10):
-        msg = "⚠️ Por favor, ingresa un número válido entre **1 y 10** para el humor."
+        msg = "⚠️ " + t("invalid_rating", lang) if "invalid_rating" in STRINGS else "⚠️ Please enter a valid number between 1 and 10."
         if update.callback_query:
             await update.callback_query.edit_message_text(msg, parse_mode="Markdown", reply_markup=get_rating_keyboard("humor"))
         else:
@@ -146,11 +147,9 @@ async def humor_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     context.user_data["humor"] = val
 
-    sueno_text = (
-        f"✅ Humor guardado: **{val}/10**\n\n"
-        "💤 **¿Cuántas horas aproximadas has dormido/descansado anoche?**\n"
-        "*(El descanso es el marcador biológico principal para tu estabilidad)*:"
-    )
+    humor_saved_str = t("humor_saved", lang).format(val=val)
+    sleep_title_str = t("sleep_title", lang)
+    sueno_text = f"{humor_saved_str}\n\n{sleep_title_str}"
 
     if update.callback_query:
         await update.callback_query.edit_message_text(
@@ -169,7 +168,8 @@ async def humor_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def sueno_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Procesa las horas de SUEÑO e inicia la pregunta de COMENTARIOS."""
+    """Procesa las horas de SUEÑO e inicia la pregunta de MEDICACIÓN."""
+    lang = get_user_language(update, context)
     val = 8.0
     if update.callback_query:
         await update.callback_query.answer()
@@ -185,22 +185,21 @@ async def sueno_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     context.user_data["sueno_horas"] = val
 
-    med_text = (
-        f"✅ Descanso guardado: **{val}h**\n\n"
-        "💊 **¿Has tomado tu medicación prescrita hoy?**"
-    )
+    sleep_saved_str = t("sleep_saved", lang).format(val=val)
+    med_title_str = t("medication_title", lang)
+    med_text = f"{sleep_saved_str}\n\n{med_title_str}"
 
     if update.callback_query:
         await update.callback_query.edit_message_text(
             med_text,
             parse_mode="Markdown",
-            reply_markup=get_medicacion_keyboard()
+            reply_markup=get_medicacion_keyboard(lang)
         )
     else:
         await update.message.reply_text(
             med_text,
             parse_mode="Markdown",
-            reply_markup=get_medicacion_keyboard()
+            reply_markup=get_medicacion_keyboard(lang)
         )
 
     return MEDICACION
@@ -208,24 +207,23 @@ async def sueno_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def medicacion_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Procesa la respuesta sobre la medicación y pasa al paso de comentarios."""
-    med_val = "Omitido"
+    lang = get_user_language(update, context)
+    med_val = t("med_skip", lang)
     if update.callback_query:
         await update.callback_query.answer()
         data = update.callback_query.data
         if data == "med_si":
-            med_val = "Sí"
+            med_val = t("med_si", lang)
         elif data == "med_parcial":
-            med_val = "Parcial"
+            med_val = t("med_parcial", lang)
         elif data == "med_no":
-            med_val = "No"
+            med_val = t("med_no", lang)
 
     context.user_data["medicacion"] = med_val
 
-    comment_text = (
-        f"✅ Medicación: **{med_val}**\n\n"
-        "📝 **¿Quieres agregar algún comentario u observación sobre tu día?**\n"
-        "(Escribe tus notas en un mensaje o presiona el botón para omitir):"
-    )
+    med_saved_str = t("medication_saved", lang).format(val=med_val)
+    comments_title_str = t("comments_title", lang)
+    comment_text = f"{med_saved_str}\n\n{comments_title_str}"
 
     if update.callback_query:
         await update.callback_query.edit_message_text(
@@ -246,6 +244,7 @@ async def medicacion_step(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Procesa el comentario final y guarda todo en Supabase con alertas precoces."""
     user_id = update.effective_user.id
+    lang = get_user_language(update, context)
     comentario = ""
 
     if update.callback_query:
@@ -280,32 +279,32 @@ async def comentarios_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     alerta_text = ""
     if energia >= 9 and sueno_horas <= 4:
         alerta_text = (
-            "\n\n⚠️ **Aviso de Bienestar:** Notamos alta energía (9-10) with muy pocas horas de descanso (<4h). "
-            "Intenta tomar un espacio de relajación hoy con `/calma`."
+            "\n\n⚠️ **Notice:** High energy detected (9-10) with very low rest (<4h). "
+            "Take a calm pause today using `/calm`." if lang == "en" else
+            ("\n\n⚠️ **Avis :** Énergie élevée détectée (9-10) avec un sommeil très court (<4h). "
+             "Prenez un temps de pause avec `/calme`." if lang == "fr" else
+             "\n\n⚠️ **Aviso de Bienestar:** Notamos alta energía (9-10) con muy pocas horas de descanso (<4h). "
+             "Intenta tomar un espacio de relajación hoy con `/calma`.")
         )
     elif energia <= 3 and humor <= 3:
         alerta_text = (
-            "\n\n💙 **Aviso de Apoyo:** Tu nivel de energía y ánimo están bajos hoy. "
-            "Sé amable contigo mismo/a. Si lo necesitas, busca a personas de confianza o usa el comando `/calma`."
+            "\n\n💙 **Support Alert:** Your energy and mood are low today. "
+            "Be kind to yourself. Reach out to trusted contacts or use `/calm` if needed." if lang == "en" else
+            ("\n\n💙 **Alerte de soutien :** Votre énergie et votre humeur sont basses aujourd'hui. "
+             "Soyez bienveillant(e) avec vous-même. Utilisez `/calme` si besoin." if lang == "fr" else
+             "\n\n💙 **Aviso de Apoyo:** Tu nivel de energía y ánimo están bajos hoy. "
+             "Sé amable contigo mismo/a. Si lo necesitas, busca a personas de confianza o usa el comando `/calma`.")
         )
 
     url_base = os.getenv("DASHBOARD_URL", "http://localhost:8501")
-    url_personalizada = f"{url_base}?user_id={user_id}"
+    url_personalizada = f"{url_base}?user_id={user_id}&lang={lang}"
 
     btn_dashboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📊 Abrir Mi Resumen de Bienestar", url=url_personalizada)]
+        [InlineKeyboardButton(t("dashboard_btn", lang), url=url_personalizada)]
     ])
 
     if result.get("success"):
-        summary_text = (
-            "🎉 **¡Registro Guardado con Éxito!**\n\n"
-            f"⚡ **Energía:** {energia}/10\n"
-            f"🎭 **Humor:** {humor}/10\n"
-            f"💤 **Descanso:** {sueno_horas}h\n"
-            f"💊 **Medicación:** {medicacion}\n"
-            f"📝 **Notas:** {comentario if comentario else 'Sin comentarios'}"
-            f"{alerta_text}"
-        )
+        summary_text = t("record_completed", lang) + alerta_text
         reply_markup = btn_dashboard
     else:
         summary_text = (
