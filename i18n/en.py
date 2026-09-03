@@ -46,7 +46,7 @@ STRINGS = {
 
     # Clinical PDF
     "pdf_generating": "📄 **Generating your Clinical PDF Report...** One moment please...",
-    "pdf_no_data": "🌸 **Notice:** No wellness logs found yet. Start logging with `/registrar`.",
+    "pdf_no_data": "🌸 **Notice:** No wellness logs found yet. Start logging with `/log`.",
     "pdf_caption": "📄 **Here is your Clinical PDF Report** ready to present at your doctor appointment or keep in your records.",
     "pdf_col_date": "Date",
     "pdf_col_energy": "Energy",
@@ -66,7 +66,7 @@ STRINGS = {
     "dashboard_msg": "✨ **Your Private Wellness Dashboard**\n\nTap the button below to view your stability charts, consult your AI wellness assistant, and download your clinical PDF report for doctor appointments:",
 
     # Cancel & Reminder Off
-    "cancel_msg": "❌ Check-in canceled. You can start again whenever you want using /registrar.",
+    "cancel_msg": "❌ Check-in canceled. You can start again whenever you want using /log.",
     "reminder_disabled": "🔕 Daily reminder turned off.",
 
     # Help

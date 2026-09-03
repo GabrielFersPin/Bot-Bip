@@ -46,7 +46,7 @@ STRINGS = {
 
     # Clinical PDF
     "pdf_generating": "📄 **Génération de votre rapport clinique PDF en cours...** Un instant s'il vous plaît...",
-    "pdf_no_data": "🌸 **Avis :** Aucun enregistrement trouvé. Commencez avec `/registrar`.",
+    "pdf_no_data": "🌸 **Avis :** Aucun enregistrement trouvé. Commencez avec `/enregistrer`.",
     "pdf_caption": "📄 **Voici votre rapport clinique au format PDF**, prêt à être présenté lors de votre consultation médicale ou à conserver dans vos archives.",
     "pdf_col_date": "Date",
     "pdf_col_energy": "Energie",
@@ -66,7 +66,7 @@ STRINGS = {
     "dashboard_msg": "✨ **Votre Tableau de Bord Privé de Bien-être**\n\nAppuyez sur le bouton ci-dessous pour afficher vos graphiques de stabilité, consulter votre assistant IA et télécharger votre rapport médical en PDF pour vos rendez-vous :",
 
     # Cancel & Reminder Off
-    "cancel_msg": "❌ Suivi annulé. Vous pouvez recommencer à tout moment en utilisant /registrar.",
+    "cancel_msg": "❌ Suivi annulé. Vous pouvez recommencer à tout moment en utilisant /enregistrer.",
     "reminder_disabled": "🔕 Rappel quotidien désactivé.",
 
     # Help
