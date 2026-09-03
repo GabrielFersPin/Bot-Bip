@@ -229,13 +229,13 @@ async def medicacion_step(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await update.callback_query.edit_message_text(
             comment_text,
             parse_mode="Markdown",
-            reply_markup=get_skip_keyboard()
+            reply_markup=get_skip_keyboard(lang)
         )
     else:
         await update.message.reply_text(
             comment_text,
             parse_mode="Markdown",
-            reply_markup=get_skip_keyboard()
+            reply_markup=get_skip_keyboard(lang)
         )
 
     return COMENTARIOS
@@ -337,9 +337,9 @@ def get_rating_keyboard(prefix: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_skip_keyboard() -> InlineKeyboardMarkup:
-    """Genera un botón para omitir los comentarios."""
-    keyboard = [[InlineKeyboardButton("⏭️ Omitir / Sin comentarios", callback_data="skip_comments")]]
+def get_skip_keyboard(lang: str = "es") -> InlineKeyboardMarkup:
+    """Genera un botón para omitir los comentarios en el idioma del usuario."""
+    keyboard = [[InlineKeyboardButton(t("btn_skip", lang), callback_data="skip_comments")]]
     return InlineKeyboardMarkup(keyboard)
 
 
@@ -760,9 +760,7 @@ async def horario_callback_handler(update: Update, context: ContextTypes.DEFAULT
         )
     elif query.data == "iniciar_registro_ahora":
         await query.message.reply_text(
-            "⚡ **Registro Diario**\n\n"
-            "**¿Cómo está tu nivel de ENERGÍA hoy?** (1 al 10):\n"
-            "1 = Exhausto | 10 = Plena energía",
+            t("energy_title", lang),
             parse_mode="Markdown",
             reply_markup=get_rating_keyboard("energia")
         )
