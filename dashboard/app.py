@@ -100,7 +100,7 @@ st.markdown("""
 def init_db():
     """Inicializa la conexión con Supabase mediante el helper de DB."""
     try:
-        return get_db_client(use_service_role=False)
+        return get_db_client(use_service_role=True)
     except Exception as e:
         st.error(f"Error conectando a Supabase: {e}")
         return None
