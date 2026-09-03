@@ -20,7 +20,7 @@ ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "")
 
 def _get_fernet() -> Optional[Fernet]:
     """Genera una instancia válida de Fernet basada en ENCRYPTION_KEY o la clave de Supabase como fallback."""
-    key_str = ENCRYPTION_KEY or os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_ANON_KEY")
+    key_str = os.getenv("ENCRYPTION_KEY", "") or os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_ANON_KEY")
     if not key_str:
         return None
     # Asegurar clave de 32 bytes codificada en url-safe base64 para Fernet

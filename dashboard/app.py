@@ -300,7 +300,6 @@ st.sidebar.info(t_dash["sidebar_tip"])
 # CARGA Y PROCESAMIENTO DE DATOS
 # ==============================================================================
 
-@st.cache_data(ttl=0)
 def fetch_data(user_id=None, start_str=None, end_str=None):
     if not db:
         return pd.DataFrame()
