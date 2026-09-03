@@ -505,6 +505,10 @@ display_cols = ["fecha", "energia", "humor", "comentarios"]
 if "user_id" in filtered_df.columns:
     display_cols.insert(1, "user_id")
 
+if "comentarios" in filtered_df.columns:
+    from db.supabase_client import decrypt_val
+    filtered_df["comentarios"] = filtered_df["comentarios"].apply(lambda x: decrypt_val(x) if isinstance(x, str) else x)
+
 st.dataframe(
     filtered_df[display_cols].sort_values("fecha", ascending=False),
     use_container_width=True,
