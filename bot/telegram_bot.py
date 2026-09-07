@@ -627,7 +627,8 @@ async def enviar_recordatorio_job(context: ContextTypes.DEFAULT_TYPE) -> None:
                 if dias_inactivo >= 3:
                     contactos = db.obtener_contactos_emergencia(chat_id)
                     if contactos:
-                        user_name = job.data.get("first_name", "tu ser querido") if isinstance(job.data, dict) else "tu ser querido"
+                        default_user_name = t("default_loved_one", lang)
+                        user_name = job.data.get("first_name", default_user_name) if isinstance(job.data, dict) else default_user_name
                         msg_apoyo = t("rescue_notification", lang, dias=dias_inactivo, user_name=user_name)
                         await context.bot.send_message(
                             chat_id=chat_id,

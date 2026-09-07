@@ -39,6 +39,7 @@ STRINGS = {
     "contacto_saved": "✅ **Contacto añadido a tu Red de Apoyo:**\n👤 **Nombre:** {nombre}\n📞 **Teléfono:** `{telefono}`\n🏷️ **Relación:** {relacion}\n\nAhora aparecerá con botones de llamada y mensaje directo al usar `/calma`.",
 
     # Recordatorio e Inactividad
+    "default_loved_one": "tu ser querido",
     "reminder_msg": "🔔 **¡Hola! Es momento de tu check-in diario de bienestar.**\n\nPresiona el botón de abajo o envía /registrar para responder tus preguntas rápidas.",
     "rescue_notification": "💙 **Notificación de Acompañamiento y Rescate:**\n\nHola, notamos que han pasado {dias} días sin registros de bienestar de {user_name}.\nEn momentos de cansancio o bajón, es totalmente normal hacer una pausa. Podría ser un buen momento para enviarle un mensaje cariñoso, una llamada o un abrazo sin presiones. 🌸",
     "reminder_config_title": "⏰ **Configuración de Recordatorio Diario**\n\nSelecciona el horario en el que prefieres recibir tu notificación diaria:",
