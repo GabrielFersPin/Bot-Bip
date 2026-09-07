@@ -506,7 +506,8 @@ if "user_id" in filtered_df.columns:
 
 if "comentarios" in filtered_df.columns:
     from db.supabase_client import decrypt_val
-    filtered_df["comentarios"] = filtered_df["comentarios"].apply(lambda x: decrypt_val(x) if isinstance(x, str) else x)
+    filtered_df = filtered_df.copy()
+    filtered_df["comentarios"] = filtered_df["comentarios"].astype(str).apply(decrypt_val)
 
 st.dataframe(
     filtered_df[display_cols].sort_values("fecha", ascending=False),
